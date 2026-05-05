@@ -8,7 +8,7 @@ Welcome to your 30-day coding challenge! This roadmap is designed to help you bu
 - **Stack:** Each day has a recommended stack, but feel free to use whatever you prefer.
 
 ## Progress Tracking
-- [ ] Day 01: Personal Portfolio Landing Page
+- [x] Day 01: Personal Portfolio Landing Page
 - [ ] Day 02: Pomodoro Timer
 - [ ] Day 03: Weather App
 - [ ] Day 04: To-Do List with LocalStorage
