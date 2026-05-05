@@ -12,7 +12,7 @@ Welcome to your 30-day coding challenge! This roadmap is designed to help you bu
 - [x] Day 02: Pomodoro Timer
 - [x] Day 03: Weather App
 - [x] Day 04: To-Do List with LocalStorage
-- [ ] Day 05: Random Quote Generator
+- [x] Day 05: Random Quote Generator
 - [ ] Day 06: Unit Converter
 - [ ] Day 07: Simple Calculator
 - [ ] Day 08: Digital Clock & Stopwatch

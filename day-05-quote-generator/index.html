@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day 05: Aesthetic Quote Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.8s ease-out forwards',
+                        'scale-up': 'scaleUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        scaleUp: {
+                            '0%': { transform: 'scale(0.95)', opacity: '0' },
+                            '100%': { transform: 'scale(1)', opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .color-transition { transition: background-color 1s ease, color 1s ease, border-color 1s ease; }
+        .quote-card { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+    </style>
+</head>
+<body id="body" class="color-transition bg-indigo-50 min-h-screen flex items-center justify-center p-6 overflow-hidden">
+
+    <main class="w-full max-w-2xl animate-scale-up">
+        <div class="quote-card bg-white/80 backdrop-blur-xl rounded-[2.5rem] p-10 md:p-16 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] border border-white/50 relative">
+            <!-- Decorative Quote Icon -->
+            <div class="absolute -top-8 -left-2 opacity-10">
+                <i data-lucide="quote" class="w-24 h-24 text-current"></i>
+            </div>
+
+            <!-- Quote Content -->
+            <div id="quote-container" class="relative z-10">
+                <p id="quote-text" class="font-serif italic text-3xl md:text-5xl text-slate-800 leading-tight mb-8 min-h-[120px]">
+                    "Design is not just what it looks like and feels like. Design is how it works."
+                </p>
+                <div class="flex items-center gap-4">
+                    <div id="author-line" class="h-px w-8 bg-slate-300"></div>
+                    <p id="quote-author" class="text-lg md:text-xl font-semibold text-slate-500 uppercase tracking-widest">
+                        Steve Jobs
+                    </p>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="mt-12 flex flex-wrap items-center justify-between gap-6 border-t border-slate-100 pt-10">
+                <div class="flex items-center gap-3">
+                    <button id="copy-btn" class="group p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 text-slate-500 transition-all active:scale-95" title="Copy to clipboard">
+                        <i data-lucide="copy" class="w-6 h-6 group-hover:scale-110 transition-transform"></i>
+                    </button>
+                    <button id="tweet-btn" class="group p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 text-slate-500 transition-all active:scale-95" title="Share on X">
+                        <i data-lucide="twitter" class="w-6 h-6 group-hover:scale-110 transition-transform"></i>
+                    </button>
+                </div>
+
+                <button id="new-quote-btn" class="px-8 py-4 bg-slate-900 text-white rounded-2xl font-bold shadow-xl hover:shadow-2xl hover:-translate-y-1 active:translate-y-0 transition-all flex items-center gap-2 group overflow-hidden relative">
+                    <span class="relative z-10">Next Quote</span>
+                    <i data-lucide="sparkles" class="w-5 h-5 relative z-10 group-hover:rotate-12 transition-transform"></i>
+                    <div id="btn-overlay" class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                </button>
+            </div>
+        </div>
+
+        <p class="text-center mt-8 text-slate-400 font-medium tracking-wide flex items-center justify-center gap-2 opacity-60">
+            <i data-lucide="mouse-pointer-2" class="w-4 h-4"></i> Click for inspiration
+        </p>
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 px-6 py-3 bg-slate-900 text-white rounded-full shadow-2xl opacity-0 translate-y-10 transition-all duration-500 flex items-center gap-3">
+        <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400"></i>
+        <span class="text-sm font-semibold">Quote copied to clipboard!</span>
+    </div>
+
+    <script>
+        const colors = [
+            { bg: 'bg-indigo-50', accent: '#6366f1', text: 'text-indigo-900', cardText: 'text-slate-800' },
+            { bg: 'bg-emerald-50', accent: '#10b981', text: 'text-emerald-900', cardText: 'text-slate-800' },
+            { bg: 'bg-rose-50', accent: '#f43f5e', text: 'text-rose-900', cardText: 'text-slate-800' },
+            { bg: 'bg-amber-50', accent: '#f59e0b', text: 'text-amber-900', cardText: 'text-slate-800' },
+            { bg: 'bg-sky-50', accent: '#0ea5e9', text: 'text-sky-900', cardText: 'text-slate-800' },
+            { bg: 'bg-violet-50', accent: '#8b5cf6', text: 'text-violet-900', cardText: 'text-slate-800' },
+            { bg: 'bg-fuchsia-50', accent: '#d946ef', text: 'text-fuchsia-900', cardText: 'text-slate-800' }
+        ];
+
+        const quotes = [
+            { text: "The only way to do great work is to love what you do.", author: "Steve Jobs" },
+            { text: "Innovation distinguishes between a leader and a follower.", author: "Steve Jobs" },
+            { text: "Your time is limited, so don't waste it living someone else's life.", author: "Steve Jobs" },
+            { text: "Stay hungry, stay foolish.", author: "Whole Earth Catalog" },
+            { text: "The future belongs to those who believe in the beauty of their dreams.", author: "Eleanor Roosevelt" },
+            { text: "It does not matter how slowly you go as long as you do not stop.", author: "Confucius" },
+            { text: "Everything you've ever wanted is on the other side of fear.", author: "George Addair" },
+            { text: "Success is not final, failure is not fatal: it is the courage to continue that counts.", author: "Winston Churchill" },
+            { text: "Hardships often prepare ordinary people for an extraordinary destiny.", author: "C.S. Lewis" },
+            { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
+            { text: "Don't count the days, make the days count.", author: "Muhammad Ali" },
+            { text: "It always seems impossible until it's done.", author: "Nelson Mandela" }
+        ];
+
+        let currentQuote = quotes[0];
+
+        // Selectors
+        const body = document.getElementById('body');
+        const quoteText = document.getElementById('quote-text');
+        const quoteAuthor = document.getElementById('quote-author');
+        const nextBtn = document.getElementById('new-quote-btn');
+        const copyBtn = document.getElementById('copy-btn');
+        const tweetBtn = document.getElementById('tweet-btn');
+        const toast = document.getElementById('toast');
+        const authorLine = document.getElementById('author-line');
+
+        function init() {
+            lucide.createIcons();
+            updateUI(true);
+        }
+
+        async function fetchQuote() {
+            try {
+                // Primary: Try fetching from API
+                const response = await fetch('https://api.quotable.io/random');
+                if (!response.ok) throw new Error('API down');
+                const data = await response.json();
+                return { text: data.content, author: data.author };
+            } catch (error) {
+                // Fallback: Random quote from local list
+                const randomIndex = Math.floor(Math.random() * quotes.length);
+                return quotes[randomIndex];
+            }
+        }
+
+        async function updateUI(isInitial = false) {
+            nextBtn.disabled = true;
+            nextBtn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i>`;
+            lucide.createIcons();
+
+            const quote = isInitial ? currentQuote : await fetchQuote();
+            currentQuote = quote;
+
+            // Fade out
+            quoteText.style.opacity = 0;
+            quoteAuthor.style.opacity = 0;
+            authorLine.style.opacity = 0;
+
+            setTimeout(() => {
+                quoteText.textContent = `"${quote.text}"`;
+                quoteAuthor.textContent = quote.author;
+
+                // Change Colors
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                body.className = `color-transition ${color.bg} min-h-screen flex items-center justify-center p-6 overflow-hidden`;
+                nextBtn.style.backgroundColor = color.accent;
+                authorLine.style.backgroundColor = color.accent;
+
+                // Fade in
+                quoteText.style.opacity = 1;
+                quoteAuthor.style.opacity = 1;
+                authorLine.style.opacity = 1;
+
+                nextBtn.disabled = false;
+                nextBtn.innerHTML = `
+                    <span class="relative z-10">Next Quote</span>
+                    <i data-lucide="sparkles" class="w-5 h-5 relative z-10 group-hover:rotate-12 transition-transform"></i>
+                `;
+                lucide.createIcons();
+            }, 300);
+        }
+
+        nextBtn.addEventListener('click', () => updateUI());
+
+        copyBtn.addEventListener('click', () => {
+            const fullText = `${currentQuote.text} — ${currentQuote.author}`;
+            navigator.clipboard.writeText(fullText).then(() => {
+                showToast();
+            });
+        });
+
+        tweetBtn.addEventListener('click', () => {
+            const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(`"${currentQuote.text}" — ${currentQuote.author}`)}`;
+            window.open(tweetUrl, '_blank');
+        });
+
+        function showToast() {
+            toast.classList.remove('opacity-0', 'translate-y-10');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-10');
+                toast.classList.remove('opacity-100', 'translate-y-0');
+            }, 3000);
+        }
+
+        init();
+    </script>
+</body>
+</html>
