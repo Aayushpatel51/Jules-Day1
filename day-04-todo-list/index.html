@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day 04: Aesthetic To-Do List</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    animation: {
+                        'slide-in': 'slideIn 0.3s ease-out forwards',
+                        'bounce-subtle': 'bounceSubtle 2s infinite',
+                    },
+                    keyframes: {
+                        slideIn: {
+                            '0%': { transform: 'translateY(10px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                        bounceSubtle: {
+                            '0%, 100%': { transform: 'translateY(-2px)' },
+                            '50%': { transform: 'translateY(2px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .todo-item { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .todo-item:hover { transform: translateX(4px); }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+        .dark ::-webkit-scrollbar-thumb { background: #334155; }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-slate-950 min-h-screen flex items-center justify-center p-4 transition-colors duration-300">
+    <!-- Dark Mode Toggle -->
+    <button id="theme-toggle" class="fixed top-6 right-6 p-3 rounded-full bg-white dark:bg-slate-900 shadow-lg border border-gray-200 dark:border-slate-800 text-gray-800 dark:text-gray-200 hover:scale-110 transition-transform active:scale-95">
+        <i data-lucide="moon" class="hidden dark:block w-5 h-5"></i>
+        <i data-lucide="sun" class="block dark:hidden w-5 h-5"></i>
+    </button>
+
+    <main class="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden border border-gray-100 dark:border-slate-800 animate-slide-in">
+        <!-- Header -->
+        <header class="p-8 pb-4">
+            <div class="flex justify-between items-end mb-2">
+                <div>
+                    <h1 class="text-3xl font-bold bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">Tasks</h1>
+                    <p id="date-display" class="text-gray-500 dark:text-gray-400 font-medium"></p>
+                </div>
+                <div class="text-right">
+                    <span id="task-stats" class="text-xs font-bold uppercase tracking-wider text-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 px-3 py-1 rounded-full">0 Pending</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Input Section -->
+        <section class="px-8 mb-6">
+            <form id="todo-form" class="relative group">
+                <input type="text" id="todo-input" placeholder="What needs to be done?"
+                    class="w-full pl-4 pr-12 py-4 bg-gray-100 dark:bg-slate-800 border-none rounded-2xl focus:ring-2 focus:ring-indigo-500 dark:text-white transition-all outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500">
+                <button type="submit" class="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl transition-colors shadow-lg shadow-indigo-200 dark:shadow-none">
+                    <i data-lucide="plus" class="w-6 h-6"></i>
+                </button>
+            </form>
+        </section>
+
+        <!-- Filters -->
+        <section class="px-8 mb-4 flex gap-4 text-sm font-medium">
+            <button data-filter="all" class="filter-btn text-indigo-500">All</button>
+            <button data-filter="active" class="filter-btn text-gray-400 hover:text-indigo-500 transition-colors">Active</button>
+            <button data-filter="completed" class="filter-btn text-gray-400 hover:text-indigo-500 transition-colors">Completed</button>
+        </section>
+
+        <!-- Task List -->
+        <section class="px-4 pb-8 h-[400px] overflow-y-auto">
+            <ul id="todo-list" class="space-y-3 px-4">
+                <!-- Items injected here -->
+            </ul>
+            <div id="empty-state" class="flex flex-col items-center justify-center h-full text-center text-gray-400 dark:text-gray-600">
+                <i data-lucide="clipboard-list" class="w-16 h-16 mb-4 opacity-20"></i>
+                <p>No tasks yet.<br>Add one to get started!</p>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // State Management
+        let todos = JSON.parse(localStorage.getItem('todos-day04')) || [];
+        let currentFilter = 'all';
+
+        // Selectors
+        const form = document.getElementById('todo-form');
+        const input = document.getElementById('todo-input');
+        const list = document.getElementById('todo-list');
+        const emptyState = document.getElementById('empty-state');
+        const stats = document.getElementById('task-stats');
+        const dateDisplay = document.getElementById('date-display');
+        const themeToggle = document.getElementById('theme-toggle');
+        const filterBtns = document.querySelectorAll('.filter-btn');
+
+        // Initialize
+        function init() {
+            lucide.createIcons();
+            updateDate();
+            render();
+            setupTheme();
+        }
+
+        function updateDate() {
+            const options = { weekday: 'long', month: 'short', day: 'numeric' };
+            dateDisplay.textContent = new Date().toLocaleDateString(undefined, options);
+        }
+
+        // Theme
+        function setupTheme() {
+            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            }
+            themeToggle.addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark');
+                localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+            });
+        }
+
+        // Actions
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const text = input.value.trim();
+            if (text) {
+                addTodo(text);
+                input.value = '';
+            }
+        });
+
+        function addTodo(text) {
+            todos.unshift({
+                id: Date.now(),
+                text,
+                completed: false,
+                createdAt: new Date()
+            });
+            saveAndRender();
+        }
+
+        function toggleTodo(id) {
+            todos = todos.map(t => t.id === id ? { ...t, completed: !t.completed } : t);
+            saveAndRender();
+        }
+
+        function deleteTodo(id) {
+            todos = todos.filter(t => t.id !== id);
+            saveAndRender();
+        }
+
+        function saveAndRender() {
+            localStorage.setItem('todos-day04', JSON.stringify(todos));
+            render();
+        }
+
+        // Filter events
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentFilter = btn.dataset.filter;
+                filterBtns.forEach(b => b.classList.remove('text-indigo-500'));
+                filterBtns.forEach(b => b.classList.add('text-gray-400'));
+                btn.classList.add('text-indigo-500');
+                btn.classList.remove('text-gray-400');
+                render();
+            });
+        });
+
+        function render() {
+            const filtered = todos.filter(t => {
+                if (currentFilter === 'active') return !t.completed;
+                if (currentFilter === 'completed') return t.completed;
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                list.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+            } else {
+                list.classList.remove('hidden');
+                emptyState.classList.add('hidden');
+
+                list.innerHTML = filtered.map(todo => `
+                    <li class="todo-item group flex items-center gap-4 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-all animate-slide-in">
+                        <button onclick="toggleTodo(${todo.id})" class="flex-shrink-0 w-6 h-6 rounded-lg border-2 transition-all flex items-center justify-center
+                            ${todo.completed ? 'bg-indigo-500 border-indigo-500' : 'border-gray-300 dark:border-slate-500 hover:border-indigo-400'}">
+                            ${todo.completed ? '<i data-lucide="check" class="w-4 h-4 text-white"></i>' : ''}
+                        </button>
+                        <span class="flex-grow text-slate-800 dark:text-slate-100 font-medium ${todo.completed ? 'line-through opacity-40' : ''}">
+                            ${todo.text}
+                        </span>
+                        <button onclick="deleteTodo(${todo.id})" class="p-2 text-gray-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 todo-item-delete">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </li>
+                `).join('');
+
+                lucide.createIcons();
+            }
+
+            const activeCount = todos.filter(t => !t.completed).length;
+            stats.textContent = `${activeCount} ${activeCount === 1 ? 'Task' : 'Tasks'} Pending`;
+        }
+
+        init();
+    </script>
+</body>
+</html>
