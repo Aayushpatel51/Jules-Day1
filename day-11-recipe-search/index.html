@@ -37,6 +37,13 @@
         .recipe-card:hover {
             transform: translateY(-8px);
         }
+        .modal-enter {
+            animation: modal-fade-in 0.3s ease-out forwards;
+        }
+        @keyframes modal-fade-in {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 min-h-screen font-sans transition-colors duration-300">
@@ -87,6 +94,27 @@
         </div>
     </main>
 
+    <!-- Ingredients Modal -->
+    <div id="ingredientsModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-950/40 backdrop-blur-sm" id="modalOverlay"></div>
+        <div class="relative bg-white dark:bg-slate-900 w-full max-w-lg rounded-[2.5rem] p-10 shadow-2xl modal-enter">
+            <button id="closeModal" class="absolute top-6 right-6 p-2 text-slate-400 hover:text-orange-500 transition-colors">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+            <div class="space-y-6">
+                <div class="flex items-center gap-4">
+                    <div class="p-3 bg-orange-100 dark:bg-orange-500/20 rounded-2xl">
+                        <i data-lucide="shopping-basket" class="w-6 h-6 text-orange-600 dark:text-orange-400"></i>
+                    </div>
+                    <h2 id="modalTitle" class="text-3xl font-serif font-bold text-slate-900 dark:text-white">Ingredients</h2>
+                </div>
+                <ul id="ingredientsList" class="space-y-3 max-h-96 overflow-y-auto pr-4">
+                    <!-- Ingredients will be listed here -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
     <script>
         lucide.createIcons();
 
@@ -103,63 +131,71 @@
             html.classList.add('dark');
         }
 
-        // Recipe API Logic (Mocked for stability/testing, can be swapped for real API)
+        const mockRecipes = [
+            {
+                id: 1,
+                label: "Classic Margherita Pizza",
+                image: "https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?w=800&q=80",
+                calories: 850,
+                ingredients: ["Pizza dough", "Tomato sauce", "Fresh mozzarella", "Fresh basil", "Extra virgin olive oil"],
+                time: 30,
+                diet: "Vegetarian"
+            },
+            {
+                id: 2,
+                label: "Creamy Mushroom Risotto",
+                image: "https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=800&q=80",
+                calories: 620,
+                ingredients: ["Arborio rice", "Cremini mushrooms", "Vegetable broth", "Parmesan cheese", "Shallots", "Garlic", "White wine", "Butter"],
+                time: 45,
+                diet: "Gluten-Free"
+            },
+            {
+                id: 3,
+                label: "Fresh Summer Salad",
+                image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&q=80",
+                calories: 320,
+                ingredients: ["Kale", "Quinoa", "Cherry tomatoes", "Cucumber", "Avocado", "Red onion", "Chickpeas", "Lemon dressing", "Sunflower seeds", "Feta cheese", "Bell pepper", "Fresh parsley"],
+                time: 15,
+                diet: "Vegan"
+            },
+            {
+                id: 4,
+                label: "Grilled Atlantic Salmon",
+                image: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=800&q=80",
+                calories: 540,
+                ingredients: ["Salmon fillet", "Lemon slices", "Asparagus", "Garlic butter", "Thyme", "Black pepper"],
+                time: 25,
+                diet: "High-Protein"
+            },
+            {
+                id: 5,
+                label: "Avocado Sourdough Toast",
+                image: "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=800&q=80",
+                calories: 420,
+                ingredients: ["Sourdough bread", "Ripe avocado", "Red pepper flakes", "Sea salt"],
+                time: 10,
+                diet: "Healthy"
+            },
+            {
+                id: 6,
+                label: "Berry Blast Smoothie Bowl",
+                image: "https://images.unsplash.com/photo-1626074353765-517a681e40be?w=800&q=80",
+                calories: 280,
+                ingredients: ["Frozen mixed berries", "Banana", "Almond milk", "Granola", "Chia seeds", "Honey", "Coconut flakes"],
+                time: 10,
+                diet: "Dairy-Free"
+            }
+        ];
+
         const searchInput = document.getElementById('searchInput');
         const searchBtn = document.getElementById('searchBtn');
         const recipeGrid = document.getElementById('recipeGrid');
         const loading = document.getElementById('loading');
         const initialState = document.getElementById('initialState');
-
-        const mockRecipes = [
-            {
-                label: "Classic Margherita Pizza",
-                image: "https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?w=800&q=80",
-                calories: 850,
-                ingredients: 5,
-                time: 30,
-                diet: "Vegetarian"
-            },
-            {
-                label: "Creamy Mushroom Risotto",
-                image: "https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=800&q=80",
-                calories: 620,
-                ingredients: 8,
-                time: 45,
-                diet: "Gluten-Free"
-            },
-            {
-                label: "Fresh Summer Salad",
-                image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&q=80",
-                calories: 320,
-                ingredients: 12,
-                time: 15,
-                diet: "Vegan"
-            },
-            {
-                label: "Grilled Atlantic Salmon",
-                image: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=800&q=80",
-                calories: 540,
-                ingredients: 6,
-                time: 25,
-                diet: "High-Protein"
-            },
-            {
-                label: "Avocado Sourdough Toast",
-                image: "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=800&q=80",
-                calories: 420,
-                ingredients: 4,
-                time: 10,
-                diet: "Healthy"
-            },
-            {
-                label: "Berry Blast Smoothie Bowl",
-                image: "https://images.unsplash.com/photo-1626074353765-517a681e40be?w=800&q=80",
-                calories: 280,
-                ingredients: 7,
-                time: 10,
-                diet: "Dairy-Free"
-            }
-        ];
+        const modal = document.getElementById('ingredientsModal');
+        const ingredientsList = document.getElementById('ingredientsList');
+        const modalTitle = document.getElementById('modalTitle');
 
         function createRecipeCard(recipe) {
             return `
@@ -181,32 +217,56 @@
                                 <span class="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1">Time</span>
                                 <span class="text-slate-900 dark:text-white font-bold">${recipe.time}m</span>
                             </div>
-                            <div class="flex flex-col items-center">
-                                <span class="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1">Ingredients</span>
-                                <span class="text-slate-900 dark:text-white font-bold">${recipe.ingredients}</span>
-                            </div>
+                            <button onclick="showIngredients(${recipe.id})" class="flex flex-col items-center group/btn cursor-pointer">
+                                <span class="text-slate-400 group-hover/btn:text-orange-500 transition-colors text-xs font-semibold uppercase tracking-wider mb-1">Ingredients</span>
+                                <span class="text-slate-900 dark:text-white font-bold group-hover/btn:text-orange-500 transition-colors flex items-center gap-1">
+                                    ${recipe.ingredients.length}
+                                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                </span>
+                            </button>
                         </div>
                     </div>
                 </div>
             `;
         }
 
+        function showIngredients(recipeId) {
+            const recipe = mockRecipes.find(r => r.id === recipeId);
+            if (!recipe) return;
+
+            modalTitle.textContent = recipe.label;
+            ingredientsList.innerHTML = recipe.ingredients.map(ing => `
+                <li class="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300 font-medium">
+                    <div class="w-2 h-2 rounded-full bg-orange-500"></div>
+                    ${ing}
+                </li>
+            `).join('');
+
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            lucide.createIcons();
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        document.getElementById('closeModal').addEventListener('click', closeModal);
+        document.getElementById('modalOverlay').addEventListener('click', closeModal);
+
         async function searchRecipes() {
             const query = searchInput.value.trim();
             if (!query) return;
 
-            // Show loading
             initialState.classList.add('hidden');
             loading.classList.remove('hidden');
 
-            // Remove old results (keep loading)
             const oldCards = recipeGrid.querySelectorAll('.recipe-card');
             oldCards.forEach(card => card.remove());
 
-            // Simulate API delay
             await new Promise(resolve => setTimeout(resolve, 800));
 
-            // In a real app: const data = await fetch(`https://api.edamam.com/search?q=${query}...`)
             const filteredRecipes = mockRecipes.filter(r =>
                 r.label.toLowerCase().includes(query.toLowerCase()) ||
                 r.diet.toLowerCase().includes(query.toLowerCase())
@@ -217,13 +277,14 @@
             if (filteredRecipes.length === 0) {
                 recipeGrid.innerHTML += `
                     <div class="col-span-full text-center py-20 text-slate-500">
-                        <p class="text-xl">No recipes found for "${query}". Try "Pasta" or "Vegan"!</p>
+                        <p class="text-xl">No recipes found for "${query}". Try "Pizza" or "Salad"!</p>
                     </div>
                 `;
             } else {
                 filteredRecipes.forEach(recipe => {
                     recipeGrid.insertAdjacentHTML('beforeend', createRecipeCard(recipe));
                 });
+                lucide.createIcons(); // Re-render icons for new cards
             }
         }
 
