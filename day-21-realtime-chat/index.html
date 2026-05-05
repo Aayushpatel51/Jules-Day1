@@ -7,6 +7,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- PeerJS for true cross-device communication -->
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -35,65 +37,84 @@
     </style>
 </head>
 <body class="bg-[#0B0E14] min-h-screen font-sans text-slate-300 p-4 md:p-12 flex items-center justify-center">
-    <div class="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div class="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-12 gap-8">
 
-        <!-- User A Chat -->
-        <div class="bg-[#151921] rounded-[2.5rem] border border-white/5 overflow-hidden flex flex-col h-[600px] terminal-glow">
-            <div class="px-8 py-6 bg-black/20 border-b border-white/5 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold">A</div>
+        <!-- Connection Info -->
+        <div class="lg:col-span-4 space-y-6">
+            <div class="p-8 bg-[#151921] rounded-[2rem] border border-white/5 terminal-glow">
+                <div class="flex items-center gap-3 mb-8">
+                    <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center">
+                        <i data-lucide="zap" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <h1 class="text-xl font-bold text-white">SocketFlow</h1>
+                </div>
+
+                <div class="space-y-6">
                     <div>
-                        <h2 class="text-white font-bold text-sm">User Alpha</h2>
-                        <span class="text-[10px] font-mono text-green-500 uppercase tracking-widest">Active Now</span>
+                        <p class="text-xs font-mono uppercase text-slate-500 mb-2">Connection Status</p>
+                        <div class="flex items-center gap-2">
+                            <div id="statusDot" class="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+                            <span id="statusText" class="text-sm font-mono text-yellow-500">Connecting...</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <p class="text-xs font-mono uppercase text-slate-500 mb-2">My Peer ID</p>
+                        <div class="flex items-center gap-2">
+                            <p id="myId" class="text-lg font-mono text-white truncate">----</p>
+                            <button id="copyIdBtn" class="p-2 hover:text-indigo-400 transition-colors" title="Copy ID">
+                                <i data-lucide="copy" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="pt-6 border-t border-white/5">
+                        <p class="text-xs font-mono uppercase text-slate-500 mb-4">Connect to Peer</p>
+                        <div class="space-y-3">
+                            <input type="text" id="remoteId" placeholder="Paste Peer ID..."
+                                class="w-full bg-slate-900/50 border border-white/5 rounded-xl px-4 py-2 text-xs font-mono text-white outline-none focus:border-indigo-500 transition-all">
+                            <button id="connectBtn" class="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all flex items-center justify-center gap-2">
+                                <i data-lucide="link" class="w-4 h-4"></i>
+                                Connect
+                            </button>
+                        </div>
                     </div>
                 </div>
-                <div class="flex gap-2">
-                    <div class="w-3 h-3 rounded-full bg-red-500/20"></div>
-                    <div class="w-3 h-3 rounded-full bg-yellow-500/20"></div>
-                </div>
             </div>
 
-            <div id="logs-A" class="flex-grow p-8 font-mono text-sm space-y-4 overflow-y-auto">
-                <p class="text-slate-500 text-center text-xs">[ Connected to Secure Channel ]</p>
-            </div>
-
-            <div class="p-6 bg-black/20 border-t border-white/5">
-                <form id="form-A" class="flex gap-3">
-                    <input type="text" id="input-A" placeholder="Type as Alpha..."
-                        class="flex-grow bg-slate-900/50 border border-white/5 rounded-xl px-4 py-3 outline-none focus:border-indigo-500 transition-all font-mono text-xs text-white">
-                    <button class="p-4 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all">
-                        <i data-lucide="send" class="w-4 h-4"></i>
-                    </button>
-                </form>
+            <div class="p-6 bg-indigo-600/10 border border-indigo-500/20 rounded-3xl">
+                <p class="text-xs text-indigo-400 font-medium leading-relaxed">
+                    <i data-lucide="info" class="inline w-3 h-3 mr-1 -mt-0.5"></i>
+                    Open this page on another device, copy its ID, and paste it here to start a P2P encrypted chat session.
+                </p>
             </div>
         </div>
 
-        <!-- User B Chat -->
-        <div class="bg-[#151921] rounded-[2.5rem] border border-white/5 overflow-hidden flex flex-col h-[600px] terminal-glow">
-            <div class="px-8 py-6 bg-black/20 border-b border-white/5 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center text-white font-bold">B</div>
-                    <div>
-                        <h2 class="text-white font-bold text-sm">User Sigma</h2>
-                        <span class="text-[10px] font-mono text-green-500 uppercase tracking-widest">Active Now</span>
-                    </div>
-                </div>
+        <!-- Chat Console -->
+        <div class="lg:col-span-8 bg-[#151921] rounded-[2.5rem] border border-white/5 overflow-hidden flex flex-col h-[700px] terminal-glow">
+            <!-- Terminal Header -->
+            <div class="px-8 py-4 bg-black/20 border-b border-white/5 flex items-center justify-between">
                 <div class="flex gap-2">
                     <div class="w-3 h-3 rounded-full bg-red-500/20"></div>
                     <div class="w-3 h-3 rounded-full bg-yellow-500/20"></div>
+                    <div class="w-3 h-3 rounded-full bg-green-500/20"></div>
                 </div>
+                <span id="remoteStatusText" class="text-[10px] font-mono text-slate-500">AWAITING CONNECTION</span>
             </div>
 
-            <div id="logs-B" class="flex-grow p-8 font-mono text-sm space-y-4 overflow-y-auto">
-                <p class="text-slate-500 text-center text-xs">[ Connected to Secure Channel ]</p>
+            <!-- Messages Area -->
+            <div id="logs" class="flex-grow p-8 font-mono text-sm space-y-3 overflow-y-auto">
+                <p class="text-slate-500 text-xs">[SYSTEM] Initializing PeerJS engine...</p>
             </div>
 
+            <!-- Input Bar -->
             <div class="p-6 bg-black/20 border-t border-white/5">
-                <form id="form-B" class="flex gap-3">
-                    <input type="text" id="input-B" placeholder="Type as Sigma..."
-                        class="flex-grow bg-slate-900/50 border border-white/5 rounded-xl px-4 py-3 outline-none focus:border-emerald-500 transition-all font-mono text-xs text-white">
-                    <button class="p-4 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition-all">
-                        <i data-lucide="send" class="w-4 h-4"></i>
+                <form id="chatForm" class="flex gap-4">
+                    <input type="text" id="chatInput" placeholder="Send a message to the peer..."
+                        class="flex-grow bg-slate-900/50 border border-white/5 rounded-xl px-6 py-4 outline-none focus:border-indigo-500 transition-all font-mono text-sm text-white disabled:opacity-50" disabled>
+                    <button id="sendBtn" class="px-8 py-4 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all flex items-center gap-2 disabled:opacity-50" disabled>
+                        <span>Send</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
                     </button>
                 </form>
             </div>
@@ -103,70 +124,115 @@
     <script>
         lucide.createIcons();
 
-        // Local communication for the same-page demo
-        const eventBus = new EventTarget();
+        const logs = document.getElementById('logs');
+        const form = document.getElementById('chatForm');
+        const input = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        const remoteStatusText = document.getElementById('remoteStatusText');
+        const myIdDisplay = document.getElementById('myId');
+        const copyIdBtn = document.getElementById('copyIdBtn');
+        const remoteIdInput = document.getElementById('remoteId');
+        const connectBtn = document.getElementById('connectBtn');
 
-        function appendMessage(targetId, user, msg, type = 'sent') {
-            const logs = document.getElementById(`logs-${targetId}`);
-            const time = new Date().toLocaleTimeString([], { hour12: false, minute: '2-digit', hour: '2-digit' });
+        let peer = new Peer();
+        let conn = null;
 
-            const div = document.createElement('div');
-            div.className = `message-anim flex flex-col ${type === 'sent' ? 'items-end' : 'items-start'}`;
+        peer.on('open', (id) => {
+            myIdDisplay.textContent = id;
+            statusDot.classList.replace('bg-yellow-500', 'bg-green-500');
+            statusDot.classList.remove('animate-pulse');
+            statusText.textContent = 'READY';
+            statusText.classList.replace('text-yellow-500', 'text-green-500');
+            addLog('SYSTEM', 'Engine ready. Waiting for connections.', 'indigo');
+        });
 
-            const bgColor = targetId === 'A'
-                ? (type === 'sent' ? 'bg-indigo-600' : 'bg-slate-800')
-                : (type === 'sent' ? 'bg-emerald-600' : 'bg-slate-800');
+        peer.on('connection', (connection) => {
+            if (conn) {
+                connection.close();
+                return;
+            }
+            conn = connection;
+            setupConnection();
+            addLog('SYSTEM', 'Incoming connection accepted.', 'green');
+        });
 
-            div.innerHTML = `
-                <div class="flex items-center gap-2 mb-1 px-1">
-                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-tighter">${user}</span>
-                    <span class="text-[10px] text-slate-600">${time}</span>
-                </div>
-                <div class="max-w-[80%] px-4 py-2 rounded-2xl ${bgColor} text-white text-xs leading-relaxed">
-                    ${msg}
-                </div>
-            `;
+        peer.on('error', (err) => {
+            addLog('ERROR', err.type + ': ' + err.message, 'red');
+            console.error(err);
+        });
 
-            logs.appendChild(div);
+        connectBtn.onclick = () => {
+            const remoteId = remoteIdInput.value.trim();
+            if (!remoteId) return;
+
+            addLog('SYSTEM', 'Attempting to handshake with ' + remoteId.substring(0, 8) + '...', 'slate');
+            conn = peer.connect(remoteId);
+            setupConnection();
+        };
+
+        function setupConnection() {
+            conn.on('open', () => {
+                remoteStatusText.textContent = 'SECURE P2P CHANNEL ACTIVE';
+                remoteStatusText.classList.replace('text-slate-500', 'text-green-500');
+                input.disabled = false;
+                sendBtn.disabled = false;
+                input.focus();
+                addLog('SYSTEM', 'Handshake successful. Encrypted stream open.', 'green');
+            });
+
+            conn.on('data', (data) => {
+                addLog('PEER', data, 'green');
+            });
+
+            conn.on('close', () => {
+                addLog('SYSTEM', 'Peer disconnected.', 'slate');
+                remoteStatusText.textContent = 'AWAITING CONNECTION';
+                remoteStatusText.classList.replace('text-green-500', 'text-slate-500');
+                input.disabled = true;
+                sendBtn.disabled = true;
+                conn = null;
+            });
+        }
+
+        function addLog(user, msg, color = 'slate') {
+            const colors = {
+                indigo: 'text-indigo-400',
+                slate: 'text-slate-500',
+                green: 'text-green-400',
+                red: 'text-red-400',
+                white: 'text-white'
+            };
+
+            const time = new Date().toLocaleTimeString([], { hour12: false });
+            const p = document.createElement('p');
+            p.className = 'message-anim';
+            p.innerHTML = `<span class="text-slate-600 text-xs">[${time}]</span> <span class="${colors[color]} font-bold">[${user}]</span> <span class="text-slate-300">${msg}</span>`;
+            logs.appendChild(p);
             logs.scrollTop = logs.scrollHeight;
         }
 
-        function setupChat(id, name, otherId, otherName) {
-            const form = document.getElementById(`form-${id}`);
-            const input = document.getElementById(`input-${id}`);
+        form.onsubmit = (e) => {
+            e.preventDefault();
+            const val = input.value.trim();
+            if (!val || !conn) return;
 
-            form.onsubmit = (e) => {
-                e.preventDefault();
-                const val = input.value.trim();
-                if (!val) return;
+            conn.send(val);
+            addLog('ME', val, 'white');
+            input.value = '';
+        };
 
-                // 1. Show in current window as 'sent'
-                appendMessage(id, name, val, 'sent');
-
-                // 2. Trigger local event
-                eventBus.dispatchEvent(new CustomEvent('message', {
-                    detail: { fromId: id, fromName: name, msg: val }
-                }));
-
-                input.value = '';
-            };
-        }
-
-        eventBus.addEventListener('message', (e) => {
-            const { fromId, fromName, msg } = e.detail;
-            // When A sends, B receives and vice versa
-            const targetId = fromId === 'A' ? 'B' : 'A';
-            appendMessage(targetId, fromName, msg, 'received');
-        });
-
-        setupChat('A', 'ALPHA', 'B', 'SIGMA');
-        setupChat('B', 'SIGMA', 'A', 'ALPHA');
-
-        // Initial welcome messages
-        setTimeout(() => {
-            appendMessage('A', 'SIGMA', 'Hey Alpha! Ready for the cluster sync?', 'received');
-            appendMessage('B', 'ALPHA', 'Ready when you are. Checking nodes...', 'received');
-        }, 1000);
+        copyIdBtn.onclick = () => {
+            navigator.clipboard.writeText(myIdDisplay.textContent);
+            const icon = copyIdBtn.querySelector('i');
+            copyIdBtn.innerHTML = '<i data-lucide="check" class="w-4 h-4 text-green-500"></i>';
+            lucide.createIcons();
+            setTimeout(() => {
+                copyIdBtn.innerHTML = '<i data-lucide="copy" class="w-4 h-4"></i>';
+                lucide.createIcons();
+            }, 2000);
+        };
     </script>
 </body>
 </html>
