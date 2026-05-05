@@ -45,12 +45,37 @@
         </div>
         <div class="flex items-center gap-6">
             <i data-lucide="search" class="w-6 h-6 cursor-pointer"></i>
-            <div class="relative cursor-pointer">
+            <div class="relative cursor-pointer" id="cartTrigger">
                 <i data-lucide="shopping-bag" class="w-6 h-6"></i>
                 <span id="cartCount" class="absolute -top-2 -right-2 bg-indigo-600 text-white text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center">0</span>
             </div>
         </div>
     </nav>
+
+    <!-- Cart Drawer -->
+    <div id="cartDrawer" class="fixed inset-0 z-50 invisible transition-all duration-300">
+        <div id="cartOverlay" class="absolute inset-0 bg-black/20 backdrop-blur-sm opacity-0 transition-opacity"></div>
+        <div class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white shadow-2xl translate-x-full transition-transform duration-300 flex flex-col">
+            <div class="p-8 border-b border-slate-100 flex items-center justify-between">
+                <h3 class="text-2xl font-black uppercase tracking-tighter">Your Cart</h3>
+                <button id="closeCart" class="p-2 hover:bg-slate-50 rounded-xl transition-all">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            <div id="cartItems" class="flex-grow p-8 overflow-y-auto space-y-6">
+                <!-- Items here -->
+            </div>
+            <div id="cartFooter" class="p-8 border-t border-slate-100 space-y-4">
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-400 font-bold uppercase tracking-widest text-xs">Total</span>
+                    <span id="cartTotal" class="text-2xl font-black">$0.00</span>
+                </div>
+                <button class="w-full py-6 bg-slate-900 text-white rounded-[2rem] font-black text-xl hover:bg-slate-800 transition-all active:scale-95">
+                    Checkout
+                </button>
+            </div>
+        </div>
+    </div>
 
     <main class="max-w-7xl mx-auto px-6 py-12 md:py-24">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-20">
@@ -60,8 +85,8 @@
                 <div class="group relative rounded-[2rem] overflow-hidden bg-slate-50 image-gallery flex items-center justify-center">
                     <img id="mainImg" src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=1000&q=80"
                         class="w-full h-full object-cover zoom-img">
-                    <div class="absolute top-8 right-8 p-4 bg-white rounded-full shadow-xl cursor-pointer hover:scale-110 transition-all">
-                        <i data-lucide="heart" class="w-6 h-6"></i>
+                    <div id="favBtn" class="absolute top-8 right-8 p-4 bg-white rounded-full shadow-xl cursor-pointer hover:scale-110 transition-all">
+                        <i data-lucide="heart" class="w-6 h-6 transition-colors"></i>
                     </div>
                 </div>
                 <div class="grid grid-cols-4 gap-6">
@@ -108,7 +133,7 @@
                         <button id="addToCart" class="flex-grow py-6 bg-slate-900 text-white rounded-[2rem] font-black text-xl hover:bg-slate-800 transition-all shadow-2xl shadow-slate-200 active:scale-95">
                             Add to Cart
                         </button>
-                        <button class="p-6 border-2 border-slate-100 rounded-[2rem] hover:bg-slate-50 transition-all">
+                        <button id="shareBtn" class="p-6 border-2 border-slate-100 rounded-[2rem] hover:bg-slate-50 transition-all">
                             <i data-lucide="share-2" class="w-6 h-6"></i>
                         </button>
                     </div>
@@ -132,23 +157,132 @@
     <script>
         lucide.createIcons();
 
-        let count = 0;
+        let cart = [];
         const countEl = document.getElementById('cartCount');
         const mainImg = document.getElementById('mainImg');
+        const cartDrawer = document.getElementById('cartDrawer');
+        const cartOverlay = document.getElementById('cartOverlay');
+        const closeCart = document.getElementById('closeCart');
+        const cartTrigger = document.getElementById('cartTrigger');
+        const cartItems = document.getElementById('cartItems');
+        const cartTotal = document.getElementById('cartTotal');
+        const favBtn = document.getElementById('favBtn');
+        const shareBtn = document.getElementById('shareBtn');
+
+        const product = {
+            id: 1,
+            name: "Obsidian Bomber Jacket",
+            price: 299.00,
+            image: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=400&q=80"
+        };
+
+        function updateCartUI() {
+            countEl.textContent = cart.length;
+            cartItems.innerHTML = '';
+
+            if (cart.length === 0) {
+                cartItems.innerHTML = `
+                    <div class="h-full flex flex-col items-center justify-center text-center space-y-4">
+                        <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center">
+                            <i data-lucide="shopping-bag" class="w-8 h-8 text-slate-300"></i>
+                        </div>
+                        <p class="text-slate-400 font-bold uppercase tracking-widest text-xs">Your cart is empty</p>
+                    </div>
+                `;
+            } else {
+                cart.forEach((item, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'flex gap-6 items-center animate-in slide-in-from-right-4 duration-300';
+                    div.innerHTML = `
+                        <div class="w-24 h-24 bg-slate-50 rounded-2xl overflow-hidden flex-shrink-0">
+                            <img src="${item.image}" class="w-full h-full object-cover">
+                        </div>
+                        <div class="flex-grow">
+                            <h4 class="font-black text-sm uppercase tracking-tight">${item.name}</h4>
+                            <p class="text-slate-400 font-bold">$${item.price.toFixed(2)}</p>
+                        </div>
+                        <button onclick="removeFromCart(${index})" class="p-2 text-slate-300 hover:text-red-500 transition-colors">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    `;
+                    cartItems.appendChild(div);
+                });
+            }
+
+            const total = cart.reduce((sum, item) => sum + item.price, 0);
+            cartTotal.textContent = `$${total.toFixed(2)}`;
+            lucide.createIcons();
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCartUI();
+        }
 
         document.getElementById('addToCart').onclick = (e) => {
-            count++;
-            countEl.textContent = count;
+            cart.push({...product});
+            updateCartUI();
 
-            // Animation
             const btn = e.target;
+            const originalText = btn.textContent;
             btn.textContent = "Added!";
-            btn.classList.add('bg-green-600');
+            btn.classList.add('bg-emerald-600');
 
             setTimeout(() => {
-                btn.textContent = "Add to Cart";
-                btn.classList.remove('bg-green-600');
+                btn.textContent = originalText;
+                btn.classList.remove('bg-emerald-600');
             }, 1000);
+        };
+
+        function toggleCart(open) {
+            if (open) {
+                cartDrawer.classList.remove('invisible');
+                setTimeout(() => {
+                    cartOverlay.classList.replace('opacity-0', 'opacity-100');
+                    cartDrawer.querySelector('.translate-x-full').classList.replace('translate-x-full', 'translate-x-0');
+                }, 10);
+            } else {
+                cartOverlay.classList.replace('opacity-100', 'opacity-0');
+                cartDrawer.querySelector('.translate-x-0').classList.replace('translate-x-0', 'translate-x-full');
+                setTimeout(() => cartDrawer.classList.add('invisible'), 300);
+            }
+        }
+
+        cartTrigger.onclick = () => toggleCart(true);
+        closeCart.onclick = () => toggleCart(false);
+        cartOverlay.onclick = () => toggleCart(false);
+
+        // Favorites logic
+        let isFav = false;
+        favBtn.onclick = () => {
+            isFav = !isFav;
+            const icon = favBtn.querySelector('i');
+            if (isFav) {
+                icon.classList.add('fill-red-500', 'text-red-500');
+            } else {
+                icon.classList.remove('fill-red-500', 'text-red-500');
+            }
+        };
+
+        // Share logic
+        shareBtn.onclick = async () => {
+            try {
+                await navigator.share({
+                    title: product.name,
+                    text: 'Check out this jacket!',
+                    url: window.location.href
+                });
+            } catch (err) {
+                // Fallback for desktop/unsupported
+                await navigator.clipboard.writeText(window.location.href);
+                const originalHTML = shareBtn.innerHTML;
+                shareBtn.innerHTML = '<i data-lucide="check" class="w-6 h-6 text-emerald-600"></i>';
+                lucide.createIcons();
+                setTimeout(() => {
+                    shareBtn.innerHTML = originalHTML;
+                    lucide.createIcons();
+                }, 2000);
+            }
         };
 
         function setImg(src) {
