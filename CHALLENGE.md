@@ -14,7 +14,7 @@ Welcome to your 30-day coding challenge! This roadmap is designed to help you bu
 - [x] Day 04: To-Do List with LocalStorage
 - [x] Day 05: Random Quote Generator
 - [x] Day 06: Unit Converter
-- [ ] Day 07: Simple Calculator
+- [x] Day 07: Simple Calculator
 - [ ] Day 08: Digital Clock & Stopwatch
 - [ ] Day 09: Color Palette Generator
 - [ ] Day 10: Markdown Previewer
