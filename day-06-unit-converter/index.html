@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day 06: Aesthetic Unit Converter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-out forwards',
+                        'slide-up': 'slideUp 0.4s ease-out forwards',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(10px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); }
+        .dark .glass { background: rgba(15, 23, 42, 0.7); }
+        select { appearance: none; }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 min-h-screen flex items-center justify-center p-6 transition-colors duration-500 font-sans">
+
+    <!-- Theme Toggle -->
+    <button id="theme-toggle" class="fixed top-8 right-8 p-3 rounded-2xl bg-white dark:bg-slate-900 shadow-xl border border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:scale-110 active:scale-95 transition-all">
+        <i data-lucide="moon" class="hidden dark:block w-5 h-5"></i>
+        <i data-lucide="sun" class="block dark:hidden w-5 h-5"></i>
+    </button>
+
+    <main class="w-full max-w-lg animate-slide-up">
+        <!-- Header -->
+        <div class="mb-8 text-center">
+            <h1 class="text-4xl font-bold bg-gradient-to-br from-indigo-600 to-violet-600 bg-clip-text text-transparent mb-2">Converter</h1>
+            <p class="text-slate-500 dark:text-slate-400 font-medium">Simple. Precise. Aesthetic.</p>
+        </div>
+
+        <!-- Converter Card -->
+        <div class="glass border border-white dark:border-slate-800 rounded-[2.5rem] shadow-2xl p-8 md:p-10">
+
+            <!-- Category Tabs -->
+            <div class="flex p-1.5 bg-slate-100 dark:bg-slate-800/50 rounded-2xl mb-8">
+                <button data-cat="length" class="cat-btn flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 bg-white dark:bg-slate-700 shadow-sm text-indigo-600 dark:text-indigo-400">
+                    <i data-lucide="ruler" class="w-4 h-4"></i> Length
+                </button>
+                <button data-cat="weight" class="cat-btn flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 text-slate-500 dark:text-slate-400 hover:text-indigo-500">
+                    <i data-lucide="weight" class="w-4 h-4"></i> Weight
+                </button>
+                <button data-cat="temp" class="cat-btn flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 text-slate-500 dark:text-slate-400 hover:text-indigo-500">
+                    <i data-lucide="thermometer" class="w-4 h-4"></i> Temp
+                </button>
+            </div>
+
+            <!-- Conversion Grid -->
+            <div class="space-y-6">
+                <!-- From -->
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-4">From</label>
+                    <div class="flex gap-3">
+                        <input type="number" id="from-val" value="1"
+                            class="flex-grow bg-slate-50 dark:bg-slate-900/50 border-2 border-transparent focus:border-indigo-500/20 focus:bg-white dark:focus:bg-slate-900 rounded-2xl p-4 text-2xl font-mono text-slate-800 dark:text-white outline-none transition-all">
+                        <div class="relative w-1/3">
+                            <select id="from-unit" class="w-full h-full bg-slate-100 dark:bg-slate-800 border-none rounded-2xl px-4 font-bold text-slate-600 dark:text-slate-300 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                                <!-- Options injected by JS -->
+                            </select>
+                            <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none opacity-40"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Swap Button -->
+                <div class="flex justify-center -my-3 relative z-10">
+                    <button id="swap-btn" class="p-3 bg-indigo-600 text-white rounded-full shadow-lg shadow-indigo-200 dark:shadow-none hover:rotate-180 transition-transform duration-500 active:scale-90">
+                        <i data-lucide="arrow-down-up" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                <!-- To -->
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-4">To</label>
+                    <div class="flex gap-3">
+                        <input type="number" id="to-val" readonly
+                            class="flex-grow bg-slate-100 dark:bg-slate-800/30 border-none rounded-2xl p-4 text-2xl font-mono text-indigo-600 dark:text-indigo-400 outline-none">
+                        <div class="relative w-1/3">
+                            <select id="to-unit" class="w-full h-full bg-slate-100 dark:bg-slate-800 border-none rounded-2xl px-4 font-bold text-slate-600 dark:text-slate-300 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                                <!-- Options injected by JS -->
+                            </select>
+                            <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none opacity-40"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formula Info -->
+            <div class="mt-8 pt-8 border-t border-slate-100 dark:border-slate-800">
+                <p id="formula-text" class="text-center text-sm font-medium text-slate-400 dark:text-slate-500 italic">
+                    1 m = 100 cm
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const units = {
+            length: {
+                m: { name: 'Meter', rate: 1 },
+                km: { name: 'Kilometer', rate: 1000 },
+                cm: { name: 'Centimeter', rate: 0.01 },
+                mm: { name: 'Millimeter', rate: 0.001 },
+                inch: { name: 'Inch', rate: 0.0254 },
+                ft: { name: 'Foot', rate: 0.3048 },
+                yd: { name: 'Yard', rate: 0.9144 },
+                mi: { name: 'Mile', rate: 1609.34 }
+            },
+            weight: {
+                kg: { name: 'Kilogram', rate: 1 },
+                g: { name: 'Gram', rate: 0.001 },
+                mg: { name: 'Milligram', rate: 0.000001 },
+                lb: { name: 'Pound', rate: 0.453592 },
+                oz: { name: 'Ounce', rate: 0.0283495 }
+            },
+            temp: {
+                c: { name: 'Celsius' },
+                f: { name: 'Fahrenheit' },
+                k: { name: 'Kelvin' }
+            }
+        };
+
+        let currentCat = 'length';
+
+        // Selectors
+        const fromVal = document.getElementById('from-val');
+        const toVal = document.getElementById('to-val');
+        const fromUnit = document.getElementById('from-unit');
+        const toUnit = document.getElementById('to-unit');
+        const catBtns = document.querySelectorAll('.cat-btn');
+        const formulaText = document.getElementById('formula-text');
+        const swapBtn = document.getElementById('swap-btn');
+        const themeToggle = document.getElementById('theme-toggle');
+
+        function init() {
+            lucide.createIcons();
+            setupTheme();
+            updateUnits();
+            convert();
+        }
+
+        function setupTheme() {
+            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            }
+            themeToggle.addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark');
+                localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+            });
+        }
+
+        function updateUnits() {
+            const currentUnits = units[currentCat];
+            const options = Object.keys(currentUnits).map(key =>
+                `<option value="${key}">${currentUnits[key].name}</option>`
+            ).join('');
+
+            fromUnit.innerHTML = options;
+            toUnit.innerHTML = options;
+
+            // Set defaults
+            if (currentCat === 'length') { fromUnit.value = 'm'; toUnit.value = 'cm'; }
+            if (currentCat === 'weight') { fromUnit.value = 'kg'; toUnit.value = 'g'; }
+            if (currentCat === 'temp') { fromUnit.value = 'c'; toUnit.value = 'f'; }
+        }
+
+        function convert() {
+            const val = parseFloat(fromVal.value);
+            if (isNaN(val)) {
+                toVal.value = '';
+                return;
+            }
+
+            const from = fromUnit.value;
+            const to = toUnit.value;
+            let result;
+
+            if (currentCat === 'temp') {
+                result = convertTemp(val, from, to);
+            } else {
+                const rateFrom = units[currentCat][from].rate;
+                const rateTo = units[currentCat][to].rate;
+                result = (val * rateFrom) / rateTo;
+            }
+
+            // Round to 4 decimal places if needed
+            toVal.value = Number(result.toFixed(4));
+            updateFormula();
+        }
+
+        function convertTemp(val, from, to) {
+            let celsius;
+            if (from === 'c') celsius = val;
+            else if (from === 'f') celsius = (val - 32) * 5/9;
+            else if (from === 'k') celsius = val - 273.15;
+
+            if (to === 'c') return celsius;
+            if (to === 'f') return (celsius * 9/5) + 32;
+            if (to === 'k') return celsius + 273.15;
+        }
+
+        function updateFormula() {
+            const from = fromUnit.value;
+            const to = toUnit.value;
+            if (currentCat === 'temp') {
+                formulaText.textContent = `Converting ${units[currentCat][from].name} to ${units[currentCat][to].name}`;
+            } else {
+                const rate = units[currentCat][from].rate / units[currentCat][to].rate;
+                formulaText.textContent = `1 ${from} = ${Number(rate.toFixed(4))} ${to}`;
+            }
+        }
+
+        // Listeners
+        fromVal.addEventListener('input', convert);
+        fromUnit.addEventListener('change', convert);
+        toUnit.addEventListener('change', convert);
+
+        catBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentCat = btn.dataset.cat;
+
+                // UI update
+                catBtns.forEach(b => {
+                    b.classList.remove('bg-white', 'dark:bg-slate-700', 'shadow-sm', 'text-indigo-600', 'dark:text-indigo-400');
+                    b.classList.add('text-slate-500', 'dark:text-slate-400', 'hover:text-indigo-500');
+                });
+                btn.classList.add('bg-white', 'dark:bg-slate-700', 'shadow-sm', 'text-indigo-600', 'dark:text-indigo-400');
+                btn.classList.remove('text-slate-500', 'dark:text-slate-400', 'hover:text-indigo-500');
+
+                updateUnits();
+                convert();
+            });
+        });
+
+        swapBtn.addEventListener('click', () => {
+            const temp = fromUnit.value;
+            fromUnit.value = toUnit.value;
+            toUnit.value = temp;
+            convert();
+        });
+
+        init();
+    </script>
+</body>
+</html>
