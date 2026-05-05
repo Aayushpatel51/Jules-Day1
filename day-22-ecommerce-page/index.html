@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arcane - E-commerce Product Page</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Space Grotesk', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        .image-gallery {
+            aspect-ratio: 1;
+        }
+        .size-btn.active {
+            background-color: #000;
+            color: #fff;
+            border-color: #000;
+        }
+        .zoom-img { transition: transform 0.5s ease; }
+        .group:hover .zoom-img { transform: scale(1.1); }
+    </style>
+</head>
+<body class="bg-white min-h-screen font-sans text-slate-900">
+    <!-- Nav -->
+    <nav class="max-w-7xl mx-auto px-6 py-8 flex justify-between items-center border-b border-slate-100">
+        <div class="flex items-center gap-12">
+            <span class="text-3xl font-black tracking-tighter uppercase">Arcane</span>
+            <div class="hidden md:flex gap-8 text-sm font-bold uppercase tracking-widest text-slate-400">
+                <a href="#" class="text-slate-900">Shop</a>
+                <a href="#" class="hover:text-slate-900 transition-colors">Men</a>
+                <a href="#" class="hover:text-slate-900 transition-colors">Women</a>
+                <a href="#" class="hover:text-slate-900 transition-colors">About</a>
+            </div>
+        </div>
+        <div class="flex items-center gap-6">
+            <i data-lucide="search" class="w-6 h-6 cursor-pointer"></i>
+            <div class="relative cursor-pointer">
+                <i data-lucide="shopping-bag" class="w-6 h-6"></i>
+                <span id="cartCount" class="absolute -top-2 -right-2 bg-indigo-600 text-white text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center">0</span>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-6 py-12 md:py-24">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-20">
+
+            <!-- Gallery -->
+            <div class="space-y-6">
+                <div class="group relative rounded-[2rem] overflow-hidden bg-slate-50 image-gallery flex items-center justify-center">
+                    <img id="mainImg" src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=1000&q=80"
+                        class="w-full h-full object-cover zoom-img">
+                    <div class="absolute top-8 right-8 p-4 bg-white rounded-full shadow-xl cursor-pointer hover:scale-110 transition-all">
+                        <i data-lucide="heart" class="w-6 h-6"></i>
+                    </div>
+                </div>
+                <div class="grid grid-cols-4 gap-6">
+                    <button onclick="setImg('https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=400&q=80')" class="rounded-2xl overflow-hidden border-2 border-black">
+                        <img src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=400&q=80" class="w-full h-full object-cover">
+                    </button>
+                    <button onclick="setImg('https://images.unsplash.com/photo-1578939662863-5cd416d45a69?w=400&q=80')" class="rounded-2xl overflow-hidden border-2 border-transparent hover:border-slate-200">
+                        <img src="https://images.unsplash.com/photo-1578939662863-5cd416d45a69?w=400&q=80" class="w-full h-full object-cover">
+                    </button>
+                    <button onclick="setImg('https://images.unsplash.com/photo-1521223890158-f9f7c3d5d504?w=400&q=80')" class="rounded-2xl overflow-hidden border-2 border-transparent hover:border-slate-200">
+                        <img src="https://images.unsplash.com/photo-1521223890158-f9f7c3d5d504?w=400&q=80" class="w-full h-full object-cover">
+                    </button>
+                    <button onclick="setImg('https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400&q=80')" class="rounded-2xl overflow-hidden border-2 border-transparent hover:border-slate-200">
+                        <img src="https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400&q=80" class="w-full h-full object-cover">
+                    </button>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="flex flex-col justify-center space-y-10">
+                <div class="space-y-4">
+                    <p class="text-sm font-bold uppercase tracking-[0.3em] text-indigo-600">Premium Outerwear</p>
+                    <h1 class="text-5xl md:text-7xl font-black tracking-tighter">Obsidian Bomber Jacket</h1>
+                    <p class="text-2xl font-bold text-slate-400">$299.00</p>
+                </div>
+
+                <p class="text-lg text-slate-500 leading-relaxed">
+                    Crafted from high-performance waterproof tech-fabric, the Obsidian Bomber is designed for the modern explorer. Featuring seamless pockets, minimalist hardware, and a temperature-regulating lining.
+                </p>
+
+                <!-- Selectors -->
+                <div class="space-y-8">
+                    <div class="space-y-4">
+                        <p class="text-xs font-bold uppercase tracking-widest text-slate-400">Select Size</p>
+                        <div class="flex flex-wrap gap-4">
+                            <button class="size-btn px-8 py-4 border-2 border-slate-100 rounded-2xl font-bold hover:border-slate-300 transition-all">S</button>
+                            <button class="size-btn active px-8 py-4 border-2 border-slate-100 rounded-2xl font-bold transition-all">M</button>
+                            <button class="size-btn px-8 py-4 border-2 border-slate-100 rounded-2xl font-bold hover:border-slate-300 transition-all">L</button>
+                            <button class="size-btn px-8 py-4 border-2 border-slate-100 rounded-2xl font-bold hover:border-slate-300 transition-all">XL</button>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4">
+                        <button id="addToCart" class="flex-grow py-6 bg-slate-900 text-white rounded-[2rem] font-black text-xl hover:bg-slate-800 transition-all shadow-2xl shadow-slate-200 active:scale-95">
+                            Add to Cart
+                        </button>
+                        <button class="p-6 border-2 border-slate-100 rounded-[2rem] hover:bg-slate-50 transition-all">
+                            <i data-lucide="share-2" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Specs -->
+                <div class="grid grid-cols-2 gap-8 pt-10 border-t border-slate-100">
+                    <div class="flex gap-4 items-center">
+                        <i data-lucide="truck" class="w-6 h-6 text-slate-400"></i>
+                        <p class="text-sm font-bold">Free Express <br>Shipping</p>
+                    </div>
+                    <div class="flex gap-4 items-center">
+                        <i data-lucide="rotate-ccw" class="w-6 h-6 text-slate-400"></i>
+                        <p class="text-sm font-bold">30-Day Easy <br>Returns</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        let count = 0;
+        const countEl = document.getElementById('cartCount');
+        const mainImg = document.getElementById('mainImg');
+
+        document.getElementById('addToCart').onclick = (e) => {
+            count++;
+            countEl.textContent = count;
+
+            // Animation
+            const btn = e.target;
+            btn.textContent = "Added!";
+            btn.classList.add('bg-green-600');
+
+            setTimeout(() => {
+                btn.textContent = "Add to Cart";
+                btn.classList.remove('bg-green-600');
+            }, 1000);
+        };
+
+        function setImg(src) {
+            mainImg.src = src;
+            // Highlight thumbnail
+            const btns = document.querySelectorAll('.grid.grid-cols-4 button');
+            btns.forEach(btn => btn.classList.replace('border-black', 'border-transparent'));
+            event.currentTarget.classList.replace('border-transparent', 'border-black');
+        }
+
+        const sizeBtns = document.querySelectorAll('.size-btn');
+        sizeBtns.forEach(btn => {
+            btn.onclick = () => {
+                sizeBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            };
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Palette Generator - 30 Day Challenge</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains+Mono', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .dark .glass {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .color-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .copy-toast {
+            transform: translate(-50%, 100%);
+            transition: transform 0.3s ease-out;
+        }
+        .copy-toast.show {
+            transform: translate(-50%, -2rem);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 min-h-screen font-sans transition-colors duration-300 flex flex-col items-center justify-center p-4">
+    <!-- Theme Toggle -->
+    <button id="themeToggle" class="fixed top-6 right-6 p-3 rounded-2xl bg-white dark:bg-slate-900 shadow-lg hover:scale-110 transition-all duration-300 z-50">
+        <i data-lucide="sun" class="w-5 h-5 text-amber-500 hidden dark:block"></i>
+        <i data-lucide="moon" class="w-5 h-5 text-indigo-600 block dark:hidden"></i>
+    </button>
+
+    <div class="w-full max-w-5xl space-y-8">
+        <div class="text-center space-y-2">
+            <h1 class="text-4xl font-bold text-slate-900 dark:text-white">Color Palette Generator</h1>
+            <p class="text-slate-500 dark:text-slate-400">Press <span class="px-2 py-1 bg-slate-200 dark:bg-slate-800 rounded font-mono text-sm">Spacebar</span> to generate new colors</p>
+        </div>
+
+        <div id="paletteContainer" class="grid grid-cols-1 md:grid-cols-5 gap-4 h-[60vh]">
+            <!-- 5 Color Cards -->
+            <div class="color-card group relative rounded-[2rem] overflow-hidden shadow-xl flex flex-col cursor-pointer" data-index="0">
+                <div class="flex-grow color-bg transition-colors duration-500"></div>
+                <div class="absolute inset-0 flex flex-col items-center justify-end p-6 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button class="lock-btn p-3 rounded-full bg-white/20 backdrop-blur-md hover:bg-white/40 transition-all mb-4 text-white">
+                        <i data-lucide="unlock" class="w-6 h-6"></i>
+                    </button>
+                </div>
+                <div class="p-6 bg-white dark:bg-slate-900 flex flex-col items-center gap-1">
+                    <span class="hex-code font-mono font-bold text-lg text-slate-900 dark:text-white uppercase tracking-wider">#FFFFFF</span>
+                    <span class="text-xs text-slate-400 dark:text-slate-500 font-medium">Click to copy</span>
+                </div>
+            </div>
+
+            <div class="color-card group relative rounded-[2rem] overflow-hidden shadow-xl flex flex-col cursor-pointer" data-index="1">
+                <div class="flex-grow color-bg transition-colors duration-500"></div>
+                <div class="absolute inset-0 flex flex-col items-center justify-end p-6 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button class="lock-btn p-3 rounded-full bg-white/20 backdrop-blur-md hover:bg-white/40 transition-all mb-4 text-white">
+                        <i data-lucide="unlock" class="w-6 h-6"></i>
+                    </button>
+                </div>
+                <div class="p-6 bg-white dark:bg-slate-900 flex flex-col items-center gap-1">
+                    <span class="hex-code font-mono font-bold text-lg text-slate-900 dark:text-white uppercase tracking-wider">#FFFFFF</span>
+                    <span class="text-xs text-slate-400 dark:text-slate-500 font-medium">Click to copy</span>
+                </div>
+            </div>
+
+            <div class="color-card group relative rounded-[2rem] overflow-hidden shadow-xl flex flex-col cursor-pointer" data-index="2">
+                <div class="flex-grow color-bg transition-colors duration-500"></div>
+                <div class="absolute inset-0 flex flex-col items-center justify-end p-6 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button class="lock-btn p-3 rounded-full bg-white/20 backdrop-blur-md hover:bg-white/40 transition-all mb-4 text-white">
+                        <i data-lucide="unlock" class="w-6 h-6"></i>
+                    </button>
+                </div>
+                <div class="p-6 bg-white dark:bg-slate-900 flex flex-col items-center gap-1">
+                    <span class="hex-code font-mono font-bold text-lg text-slate-900 dark:text-white uppercase tracking-wider">#FFFFFF</span>
+                    <span class="text-xs text-slate-400 dark:text-slate-500 font-medium">Click to copy</span>
+                </div>
+            </div>
+
+            <div class="color-card group relative rounded-[2rem] overflow-hidden shadow-xl flex flex-col cursor-pointer" data-index="3">
+                <div class="flex-grow color-bg transition-colors duration-500"></div>
+                <div class="absolute inset-0 flex flex-col items-center justify-end p-6 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button class="lock-btn p-3 rounded-full bg-white/20 backdrop-blur-md hover:bg-white/40 transition-all mb-4 text-white">
+                        <i data-lucide="unlock" class="w-6 h-6"></i>
+                    </button>
+                </div>
+                <div class="p-6 bg-white dark:bg-slate-900 flex flex-col items-center gap-1">
+                    <span class="hex-code font-mono font-bold text-lg text-slate-900 dark:text-white uppercase tracking-wider">#FFFFFF</span>
+                    <span class="text-xs text-slate-400 dark:text-slate-500 font-medium">Click to copy</span>
+                </div>
+            </div>
+
+            <div class="color-card group relative rounded-[2rem] overflow-hidden shadow-xl flex flex-col cursor-pointer" data-index="4">
+                <div class="flex-grow color-bg transition-colors duration-500"></div>
+                <div class="absolute inset-0 flex flex-col items-center justify-end p-6 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button class="lock-btn p-3 rounded-full bg-white/20 backdrop-blur-md hover:bg-white/40 transition-all mb-4 text-white">
+                        <i data-lucide="unlock" class="w-6 h-6"></i>
+                    </button>
+                </div>
+                <div class="p-6 bg-white dark:bg-slate-900 flex flex-col items-center gap-1">
+                    <span class="hex-code font-mono font-bold text-lg text-slate-900 dark:text-white uppercase tracking-wider">#FFFFFF</span>
+                    <span class="text-xs text-slate-400 dark:text-slate-500 font-medium">Click to copy</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex justify-center">
+            <button id="generateBtn" class="px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold shadow-xl shadow-indigo-500/20 transition-all active:scale-95 flex items-center gap-3">
+                <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                Generate New Palette
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="copyToast" class="fixed bottom-0 left-1/2 copy-toast bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-2xl z-50 flex items-center gap-2 font-medium">
+        <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400"></i>
+        Color copied to clipboard!
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+
+        themeToggle.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+        });
+
+        if (localStorage.getItem('theme') === 'dark') {
+            html.classList.add('dark');
+        }
+
+        // Color Generation Logic
+        const cards = document.querySelectorAll('.color-card');
+        const generateBtn = document.getElementById('generateBtn');
+        const toast = document.getElementById('copyToast');
+
+        const state = Array.from({ length: 5 }, () => ({
+            color: '#FFFFFF',
+            locked: false
+        }));
+
+        function generateRandomColor() {
+            const chars = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += chars[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        function updatePalette() {
+            state.forEach((item, index) => {
+                if (!item.locked) {
+                    item.color = generateRandomColor();
+                }
+
+                const card = cards[index];
+                const bg = card.querySelector('.color-bg');
+                const hex = card.querySelector('.hex-code');
+                const lockIcon = card.querySelector('.lock-btn i');
+
+                bg.style.backgroundColor = item.color;
+                hex.textContent = item.color;
+
+                // Update lock icon
+                const iconName = item.locked ? 'lock' : 'unlock';
+                card.querySelector('.lock-btn').innerHTML = `<i data-lucide="${iconName}" class="w-6 h-6"></i>`;
+            });
+            lucide.createIcons();
+        }
+
+        function toggleLock(index, e) {
+            e.stopPropagation();
+            state[index].locked = !state[index].locked;
+            const iconName = state[index].locked ? 'lock' : 'unlock';
+            cards[index].querySelector('.lock-btn').innerHTML = `<i data-lucide="${iconName}" class="w-6 h-6"></i>`;
+            lucide.createIcons();
+        }
+
+        async function copyToClipboard(color) {
+            try {
+                await navigator.clipboard.writeText(color);
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 2000);
+            } catch (err) {
+                console.error('Failed to copy!', err);
+            }
+        }
+
+        // Event Listeners
+        generateBtn.addEventListener('click', updatePalette);
+
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                updatePalette();
+            }
+        });
+
+        cards.forEach((card, index) => {
+            const lockBtn = card.querySelector('.lock-btn');
+            lockBtn.addEventListener('click', (e) => toggleLock(index, e));
+
+            card.addEventListener('click', () => {
+                copyToClipboard(state[index].color);
+            });
+        });
+
+        // Initial Palette
+        updatePalette();
+    </script>
+</body>
+</html>

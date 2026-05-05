@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ink - Minimalist CMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        .post-card { transition: all 0.3s ease; }
+        .post-card:hover { transform: translateY(-4px); }
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        ::-webkit-scrollbar { width: 0px; }
+    </style>
+</head>
+<body class="bg-[#FBFBFB] min-h-screen font-sans text-slate-900">
+
+    <div class="flex h-screen overflow-hidden">
+
+        <!-- Sidebar Navigation -->
+        <aside class="w-20 lg:w-64 border-r border-slate-100 bg-white flex flex-col">
+            <div class="p-8">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-black rounded-xl flex items-center justify-center">
+                        <i data-lucide="pen-tool" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <span class="hidden lg:block text-2xl font-serif font-bold">Ink.</span>
+                </div>
+            </div>
+
+            <nav class="flex-grow px-4 space-y-2">
+                <button onclick="setView('list')" class="nav-btn w-full flex items-center gap-4 px-4 py-3 bg-black text-white rounded-xl font-bold">
+                    <i data-lucide="layout" class="w-5 h-5"></i>
+                    <span class="hidden lg:block">Posts</span>
+                </button>
+                <button onclick="setView('editor')" class="nav-btn w-full flex items-center gap-4 px-4 py-3 text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-xl font-bold transition-all">
+                    <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                    <span class="hidden lg:block">New Post</span>
+                </button>
+                <button class="nav-btn w-full flex items-center gap-4 px-4 py-3 text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-xl font-bold transition-all">
+                    <i data-lucide="image" class="w-5 h-5"></i>
+                    <span class="hidden lg:block">Media</span>
+                </button>
+            </nav>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="flex-grow overflow-y-auto">
+
+            <!-- List View -->
+            <div id="listView" class="p-8 lg:p-20 space-y-12">
+                <header class="flex justify-between items-center">
+                    <div>
+                        <h1 class="text-5xl font-serif font-bold">All Posts</h1>
+                        <p class="text-slate-400 font-medium mt-2">Managing your digital content effortlessly.</p>
+                    </div>
+                    <button onclick="setView('editor')" class="px-8 py-4 bg-black text-white rounded-2xl font-bold hover:opacity-80 transition-all shadow-xl shadow-slate-200">
+                        Create Post
+                    </button>
+                </header>
+
+                <div id="postsContainer" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+                    <!-- Post cards -->
+                </div>
+            </div>
+
+            <!-- Editor View -->
+            <div id="editorView" class="hidden h-full flex flex-col">
+                <header class="p-8 border-b border-slate-100 flex justify-between items-center bg-white">
+                    <button onclick="setView('list')" class="flex items-center gap-2 text-slate-400 font-bold hover:text-black transition-all">
+                        <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                        Back to Posts
+                    </button>
+                    <div class="flex items-center gap-4">
+                        <span class="text-xs font-black uppercase tracking-widest text-slate-300">Draft</span>
+                        <button id="savePostBtn" class="px-8 py-3 bg-black text-white rounded-xl font-bold hover:opacity-80 transition-all">Publish</button>
+                    </div>
+                </header>
+                <div class="flex-grow p-8 lg:p-20 max-w-4xl mx-auto w-full space-y-12">
+                    <input type="text" id="postTitle" placeholder="Post Title" class="w-full text-6xl font-serif font-bold border-none outline-none placeholder:text-slate-100">
+                    <textarea id="postContent" placeholder="Tell your story..." class="w-full h-96 text-xl leading-relaxed text-slate-600 border-none outline-none resize-none placeholder:text-slate-100"></textarea>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        let posts = JSON.parse(localStorage.getItem('ink_posts')) || [
+            { id: 1, title: 'The Future of Minimalism', excerpt: 'How simple design is changing the way we interact with technology.', date: 'Oct 24, 2023', status: 'Published' },
+            { id: 2, title: 'Typography in Modern CMS', excerpt: 'Why font choice matters more than your backend architecture.', date: 'Oct 22, 2023', status: 'Draft' }
+        ];
+
+        function setView(view) {
+            document.getElementById('listView').classList.toggle('hidden', view !== 'list');
+            document.getElementById('editorView').classList.toggle('hidden', view !== 'editor');
+
+            // Update nav buttons
+            const btns = document.querySelectorAll('.nav-btn');
+            btns.forEach(btn => {
+                btn.classList.remove('bg-black', 'text-white');
+                btn.classList.add('text-slate-400');
+            });
+            const activeIdx = view === 'list' ? 0 : 1;
+            btns[activeIdx].classList.replace('text-slate-400', 'text-white');
+            btns[activeIdx].classList.add('bg-black');
+
+            if (view === 'list') renderPosts();
+        }
+
+        function renderPosts() {
+            const container = document.getElementById('postsContainer');
+            container.innerHTML = '';
+            posts.forEach(post => {
+                const div = document.createElement('div');
+                div.className = 'post-card bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6';
+                div.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <span class="px-4 py-1 rounded-full text-[10px] font-black tracking-widest uppercase ${post.status === 'Published' ? 'bg-green-50 text-green-600' : 'bg-orange-50 text-orange-600'}">
+                            ${post.status}
+                        </span>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">${post.date}</p>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-serif font-bold mb-3">${post.title}</h3>
+                        <p class="text-slate-500 text-sm leading-relaxed line-clamp-3">${post.excerpt || 'No description provided.'}</p>
+                    </div>
+                    <div class="pt-6 border-t border-slate-50 flex gap-4">
+                        <button class="text-xs font-bold hover:text-indigo-600">Edit</button>
+                        <button class="text-xs font-bold hover:text-indigo-600">Preview</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        document.getElementById('savePostBtn').onclick = () => {
+            const title = document.getElementById('postTitle').value;
+            const content = document.getElementById('postContent').value;
+            if (!title) return;
+
+            posts.unshift({
+                id: Date.now(),
+                title: title,
+                excerpt: content.substring(0, 100) + '...',
+                date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                status: 'Published'
+            });
+            localStorage.setItem('ink_posts', JSON.stringify(posts));
+            setView('list');
+            document.getElementById('postTitle').value = '';
+            document.getElementById('postContent').value = '';
+        };
+
+        renderPosts();
+    </script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+node_modules/
+.DS_Store
+*.log
+verification/*.png
+verification/*.log
+verification/node_modules/
+package-lock.json

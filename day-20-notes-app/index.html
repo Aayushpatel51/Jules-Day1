@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZenNote - 30 Day Challenge</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        .note-card { transition: all 0.2s ease; }
+        .note-card:hover { transform: translateY(-4px); }
+        .glass {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .prose h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .prose p { margin-bottom: 1rem; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-[#FAFAFA] min-h-screen font-sans text-slate-900">
+    <div class="flex h-screen overflow-hidden">
+
+        <!-- Sidebar: Notes List -->
+        <aside class="w-80 border-r border-slate-100 bg-white flex flex-col">
+            <div class="p-8 space-y-6">
+                <div class="flex items-center justify-between">
+                    <h1 class="text-2xl font-bold tracking-tight">Zen<span class="text-indigo-600">Note</span></h1>
+                    <button id="addNoteBtn" class="p-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all">
+                        <i data-lucide="plus" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                <div class="relative">
+                    <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4"></i>
+                    <input type="text" id="searchNotes" placeholder="Search notes..."
+                        class="w-full bg-slate-50 rounded-xl pl-10 pr-4 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all">
+                </div>
+            </div>
+
+            <div id="notesList" class="flex-grow overflow-y-auto px-4 space-y-2 pb-8">
+                <!-- Notes will appear here -->
+            </div>
+        </aside>
+
+        <!-- Main Editor -->
+        <main class="flex-grow flex flex-col bg-slate-50">
+            <header class="p-8 flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <span id="saveStatus" class="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-1">
+                        <i data-lucide="check" class="w-3 h-3"></i> Saved
+                    </span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button id="deleteBtn" class="p-3 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all">
+                        <i data-lucide="trash-2" class="w-5 h-5"></i>
+                    </button>
+                    <button id="previewToggle" class="px-6 py-3 bg-white border border-slate-200 rounded-xl font-bold text-sm hover:border-indigo-600 transition-all flex items-center gap-2">
+                        <i data-lucide="eye" class="w-4 h-4"></i>
+                        <span>Preview</span>
+                    </button>
+                </div>
+            </header>
+
+            <div class="flex-grow px-12 pb-12 overflow-hidden flex flex-col">
+                <input type="text" id="noteTitle" placeholder="Note Title"
+                    class="w-full bg-transparent text-5xl font-bold border-none outline-none mb-8 placeholder:text-slate-200 text-slate-900">
+
+                <div class="flex-grow relative">
+                    <textarea id="noteContent" placeholder="Start writing your masterpiece..."
+                        class="w-full h-full bg-transparent border-none outline-none resize-none text-lg leading-relaxed text-slate-600 placeholder:text-slate-200"></textarea>
+
+                    <div id="previewArea" class="hidden absolute inset-0 bg-slate-50 overflow-y-auto prose prose-slate max-w-none text-lg leading-relaxed text-slate-600">
+                        <!-- Markdown Preview -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        let notes = JSON.parse(localStorage.getItem('zennotes')) || [
+            { id: 1, title: 'Welcome to ZenNote 🌿', content: '# Hello!\n\nThis is a ZenNote. It supports **Markdown**.\n\n- Click + to create\n- Select notes on the left\n- Use Preview to see formatting', date: Date.now() }
+        ];
+        let activeNoteId = notes[0]?.id;
+
+        const notesList = document.getElementById('notesList');
+        const titleInput = document.getElementById('noteTitle');
+        const contentInput = document.getElementById('noteContent');
+        const previewArea = document.getElementById('previewArea');
+        const saveStatus = document.getElementById('saveStatus');
+
+        function renderNotesList() {
+            const query = document.getElementById('searchNotes').value.toLowerCase();
+            notesList.innerHTML = '';
+
+            notes
+                .filter(n => n.title.toLowerCase().includes(query))
+                .sort((a, b) => b.date - a.date)
+                .forEach(note => {
+                    const div = document.createElement('div');
+                    div.className = `p-5 rounded-2xl cursor-pointer transition-all ${note.id === activeNoteId ? 'bg-indigo-50 border-indigo-100 border shadow-sm' : 'hover:bg-slate-50'}`;
+                    div.onclick = () => selectNote(note.id);
+                    div.innerHTML = `
+                        <h3 class="font-bold text-slate-900 truncate mb-1">${note.title || 'Untitled'}</h3>
+                        <p class="text-xs text-slate-400 font-medium">${new Date(note.date).toLocaleDateString()}</p>
+                    `;
+                    notesList.appendChild(div);
+                });
+        }
+
+        function selectNote(id) {
+            saveNote(); // Save current before switching
+            activeNoteId = id;
+            const note = notes.find(n => n.id === id);
+            titleInput.value = note.title;
+            contentInput.value = note.content;
+
+            if (!previewArea.classList.contains('hidden')) togglePreview();
+            renderNotesList();
+        }
+
+        function saveNote() {
+            const note = notes.find(n => n.id === activeNoteId);
+            if (!note) return;
+
+            note.title = titleInput.value;
+            note.content = contentInput.value;
+            note.date = Date.now();
+
+            localStorage.setItem('zennotes', JSON.stringify(notes));
+
+            saveStatus.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Saved';
+            lucide.createIcons();
+            renderNotesList();
+        }
+
+        function togglePreview() {
+            const isHidden = previewArea.classList.contains('hidden');
+            if (isHidden) {
+                previewArea.innerHTML = marked.parse(contentInput.value);
+                previewArea.classList.remove('hidden');
+                contentInput.classList.add('invisible');
+                document.querySelector('#previewToggle span').textContent = 'Edit';
+            } else {
+                previewArea.classList.add('hidden');
+                contentInput.classList.remove('invisible');
+                document.querySelector('#previewToggle span').textContent = 'Preview';
+            }
+        }
+
+        document.getElementById('addNoteBtn').onclick = () => {
+            const newNote = {
+                id: Date.now(),
+                title: '',
+                content: '',
+                date: Date.now()
+            };
+            notes.push(newNote);
+            selectNote(newNote.id);
+            titleInput.focus();
+        };
+
+        document.getElementById('deleteBtn').onclick = () => {
+            notes = notes.filter(n => n.id !== activeNoteId);
+            if (notes.length > 0) selectNote(notes[0].id);
+            else {
+                activeNoteId = null;
+                titleInput.value = '';
+                contentInput.value = '';
+            }
+            saveNote();
+        };
+
+        document.getElementById('previewToggle').onclick = togglePreview;
+
+        let saveTimeout;
+        const triggerSave = () => {
+            saveStatus.innerHTML = '<i data-lucide="loader" class="w-3 h-3 animate-spin"></i> Saving...';
+            lucide.createIcons();
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(saveNote, 1000);
+        };
+
+        titleInput.oninput = triggerSave;
+        contentInput.oninput = triggerSave;
+        document.getElementById('searchNotes').oninput = renderNotesList;
+
+        // Init
+        selectNote(activeNoteId);
+    </script>
+</body>
+</html>

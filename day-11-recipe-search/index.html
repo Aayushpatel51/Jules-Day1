@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe Finder - 30 Day Challenge</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .dark .glass {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .recipe-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .recipe-card:hover {
+            transform: translateY(-8px);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 min-h-screen font-sans transition-colors duration-300">
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 glass border-b border-white/20 dark:border-white/10 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="p-2 bg-orange-500 rounded-xl">
+                    <i data-lucide="utensils" class="w-6 h-6 text-white"></i>
+                </div>
+                <span class="text-2xl font-serif font-bold text-slate-900 dark:text-white">Taste<span class="text-orange-500">Hub</span></span>
+            </div>
+            <button id="themeToggle" class="p-3 rounded-2xl bg-white dark:bg-slate-900 shadow-lg hover:scale-110 transition-all duration-300">
+                <i data-lucide="sun" class="w-5 h-5 text-amber-500 hidden dark:block"></i>
+                <i data-lucide="moon" class="w-5 h-5 text-indigo-600 block dark:hidden"></i>
+            </button>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-6 py-12 space-y-12">
+        <!-- Hero Section -->
+        <div class="text-center space-y-6 max-w-2xl mx-auto">
+            <h1 class="text-5xl md:text-6xl font-serif font-bold text-slate-900 dark:text-white leading-tight">Find the perfect <span class="text-orange-500 italic">recipe</span> for any occasion</h1>
+            <p class="text-lg text-slate-600 dark:text-slate-400">Search thousands of recipes, ingredients, and nutritional information instantly.</p>
+
+            <div class="relative group">
+                <input type="text" id="searchInput" placeholder="Search for recipes (e.g., Pasta, Vegan, Breakfast)..."
+                    class="w-full px-8 py-5 rounded-[2rem] bg-white dark:bg-slate-900 border-2 border-transparent focus:border-orange-500 outline-none shadow-2xl transition-all text-slate-900 dark:text-white pr-16">
+                <button id="searchBtn" class="absolute right-3 top-3 bottom-3 px-6 rounded-2xl bg-orange-500 text-white hover:bg-orange-600 transition-colors shadow-lg shadow-orange-500/30">
+                    <i data-lucide="search" class="w-6 h-6"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Results Grid -->
+        <div id="recipeGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Loading State -->
+            <div id="loading" class="hidden col-span-full text-center py-20">
+                <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-orange-500 border-t-transparent"></div>
+                <p class="mt-4 text-slate-500 font-medium">Fetching culinary delights...</p>
+            </div>
+
+            <!-- Default Content -->
+            <div id="initialState" class="col-span-full text-center py-20 space-y-4">
+                <i data-lucide="chef-hat" class="w-16 h-16 text-slate-300 mx-auto"></i>
+                <p class="text-slate-500 text-xl font-medium">Type something to start your food journey</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+
+        themeToggle.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+        });
+
+        if (localStorage.getItem('theme') === 'dark') {
+            html.classList.add('dark');
+        }
+
+        // Recipe API Logic (Mocked for stability/testing, can be swapped for real API)
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const recipeGrid = document.getElementById('recipeGrid');
+        const loading = document.getElementById('loading');
+        const initialState = document.getElementById('initialState');
+
+        const mockRecipes = [
+            {
+                label: "Classic Margherita Pizza",
+                image: "https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?w=800&q=80",
+                calories: 850,
+                ingredients: 5,
+                time: 30,
+                diet: "Vegetarian"
+            },
+            {
+                label: "Creamy Mushroom Risotto",
+                image: "https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=800&q=80",
+                calories: 620,
+                ingredients: 8,
+                time: 45,
+                diet: "Gluten-Free"
+            },
+            {
+                label: "Fresh Summer Salad",
+                image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&q=80",
+                calories: 320,
+                ingredients: 12,
+                time: 15,
+                diet: "Vegan"
+            },
+            {
+                label: "Grilled Atlantic Salmon",
+                image: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=800&q=80",
+                calories: 540,
+                ingredients: 6,
+                time: 25,
+                diet: "High-Protein"
+            },
+            {
+                label: "Avocado Sourdough Toast",
+                image: "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=800&q=80",
+                calories: 420,
+                ingredients: 4,
+                time: 10,
+                diet: "Healthy"
+            },
+            {
+                label: "Berry Blast Smoothie Bowl",
+                image: "https://images.unsplash.com/photo-1626074353765-517a681e40be?w=800&q=80",
+                calories: 280,
+                ingredients: 7,
+                time: 10,
+                diet: "Dairy-Free"
+            }
+        ];
+
+        function createRecipeCard(recipe) {
+            return `
+                <div class="recipe-card glass rounded-[2.5rem] overflow-hidden shadow-xl flex flex-col">
+                    <div class="relative h-64 overflow-hidden">
+                        <img src="${recipe.image}" alt="${recipe.label}" class="w-full h-full object-cover">
+                        <div class="absolute top-4 right-4 px-4 py-2 rounded-full bg-white/90 backdrop-blur-md text-orange-600 font-bold text-sm shadow-lg">
+                            ${recipe.diet}
+                        </div>
+                    </div>
+                    <div class="p-8 flex flex-col flex-grow">
+                        <h3 class="text-2xl font-serif font-bold text-slate-900 dark:text-white mb-4 line-clamp-1">${recipe.label}</h3>
+                        <div class="flex items-center justify-between mt-auto pt-6 border-t border-slate-100 dark:border-slate-800">
+                            <div class="flex flex-col items-center">
+                                <span class="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1">Calories</span>
+                                <span class="text-slate-900 dark:text-white font-bold">${recipe.calories}</span>
+                            </div>
+                            <div class="flex flex-col items-center">
+                                <span class="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1">Time</span>
+                                <span class="text-slate-900 dark:text-white font-bold">${recipe.time}m</span>
+                            </div>
+                            <div class="flex flex-col items-center">
+                                <span class="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1">Ingredients</span>
+                                <span class="text-slate-900 dark:text-white font-bold">${recipe.ingredients}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function searchRecipes() {
+            const query = searchInput.value.trim();
+            if (!query) return;
+
+            // Show loading
+            initialState.classList.add('hidden');
+            loading.classList.remove('hidden');
+
+            // Remove old results (keep loading)
+            const oldCards = recipeGrid.querySelectorAll('.recipe-card');
+            oldCards.forEach(card => card.remove());
+
+            // Simulate API delay
+            await new Promise(resolve => setTimeout(resolve, 800));
+
+            // In a real app: const data = await fetch(`https://api.edamam.com/search?q=${query}...`)
+            const filteredRecipes = mockRecipes.filter(r =>
+                r.label.toLowerCase().includes(query.toLowerCase()) ||
+                r.diet.toLowerCase().includes(query.toLowerCase())
+            );
+
+            loading.classList.add('hidden');
+
+            if (filteredRecipes.length === 0) {
+                recipeGrid.innerHTML += `
+                    <div class="col-span-full text-center py-20 text-slate-500">
+                        <p class="text-xl">No recipes found for "${query}". Try "Pasta" or "Vegan"!</p>
+                    </div>
+                `;
+            } else {
+                filteredRecipes.forEach(recipe => {
+                    recipeGrid.insertAdjacentHTML('beforeend', createRecipeCard(recipe));
+                });
+            }
+        }
+
+        searchBtn.addEventListener('click', searchRecipes);
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') searchRecipes();
+        });
+    </script>
+</body>
+</html>

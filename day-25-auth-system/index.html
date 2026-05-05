@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus - Auth System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        .auth-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+        .gradient-bg {
+            background: radial-gradient(circle at 10% 20%, #4f46e5 0%, transparent 40%),
+                        radial-gradient(circle at 90% 80%, #9333ea 0%, transparent 40%);
+        }
+        .input-focus {
+            transition: all 0.2s ease;
+        }
+        .input-focus:focus {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen font-sans text-slate-900 flex items-center justify-center p-6 gradient-bg">
+
+    <!-- Login Card -->
+    <div id="loginCard" class="auth-card max-w-md w-full p-12 rounded-[3rem] shadow-2xl space-y-8 animate-in fade-in zoom-in-95 duration-500">
+        <div class="text-center space-y-2">
+            <div class="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6 rotate-6 shadow-xl shadow-indigo-200">
+                <i data-lucide="lock" class="text-white w-8 h-8"></i>
+            </div>
+            <h1 class="text-4xl font-black tracking-tighter">Welcome Back</h1>
+            <p class="text-slate-500 font-medium">Enter your details to access Nexus.</p>
+        </div>
+
+        <form id="loginForm" class="space-y-4">
+            <div class="space-y-2">
+                <label class="text-xs font-bold uppercase tracking-widest text-slate-400 ml-4">Email Address</label>
+                <input type="email" required placeholder="name@company.com"
+                    class="w-full px-8 py-5 bg-white rounded-3xl border-none outline-none input-focus shadow-sm text-sm font-medium">
+            </div>
+            <div class="space-y-2">
+                <div class="flex justify-between px-4">
+                    <label class="text-xs font-bold uppercase tracking-widest text-slate-400">Password</label>
+                    <a href="#" class="text-xs font-bold text-indigo-600 hover:underline">Forgot?</a>
+                </div>
+                <input type="password" required placeholder="••••••••"
+                    class="w-full px-8 py-5 bg-white rounded-3xl border-none outline-none input-focus shadow-sm text-sm font-medium">
+            </div>
+            <button type="submit" class="w-full py-5 bg-indigo-600 text-white rounded-3xl font-bold text-lg hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-200 active:scale-95">
+                Sign In
+            </button>
+        </form>
+
+        <div class="relative py-4">
+            <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-200"></div></div>
+            <div class="relative flex justify-center text-xs uppercase font-bold tracking-widest text-slate-400">
+                <span class="bg-white/0 px-4 backdrop-blur-md">Or continue with</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <button class="flex items-center justify-center gap-3 py-4 bg-white rounded-2xl border border-slate-100 hover:bg-slate-50 transition-all font-bold text-sm">
+                <i data-lucide="github" class="w-5 h-5"></i>
+                Github
+            </button>
+            <button class="flex items-center justify-center gap-3 py-4 bg-white rounded-2xl border border-slate-100 hover:bg-slate-50 transition-all font-bold text-sm">
+                <i data-lucide="chrome" class="w-5 h-5"></i>
+                Google
+            </button>
+        </div>
+
+        <p class="text-center text-sm font-medium text-slate-500 pt-4">
+            Don't have an account? <button onclick="toggleCard()" class="text-indigo-600 font-bold hover:underline">Create one</button>
+        </p>
+    </div>
+
+    <!-- Protected View (Mock) -->
+    <div id="protectedView" class="hidden auth-card max-w-md w-full p-12 rounded-[3rem] shadow-2xl text-center space-y-6 animate-in fade-in slide-in-from-bottom-4">
+        <div class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto">
+            <i data-lucide="check-circle" class="w-10 h-10"></i>
+        </div>
+        <h2 class="text-3xl font-bold">Authentication Success</h2>
+        <p class="text-slate-500 leading-relaxed">You have successfully logged into the protected Nexus environment. This session is secured with mock JWT logic.</p>
+        <button onclick="location.reload()" class="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold">Logout</button>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        const loginForm = document.getElementById('loginForm');
+        const loginCard = document.getElementById('loginCard');
+        const protectedView = document.getElementById('protectedView');
+
+        loginForm.onsubmit = (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.innerHTML = '<i data-lucide="loader" class="w-6 h-6 animate-spin mx-auto"></i>';
+            lucide.createIcons();
+
+            setTimeout(() => {
+                loginCard.classList.add('hidden');
+                protectedView.classList.remove('hidden');
+            }, 1500);
+        };
+
+        function toggleCard() {
+            const h1 = loginCard.querySelector('h1');
+            const p = loginCard.querySelector('p');
+            const btn = loginCard.querySelector('button[type="submit"]');
+            const toggle = loginCard.querySelector('p:last-child');
+
+            if (h1.textContent === 'Welcome Back') {
+                h1.textContent = 'Join Nexus';
+                p.textContent = 'Start your journey with the community.';
+                btn.textContent = 'Create Account';
+                toggle.innerHTML = 'Already have an account? <button onclick="toggleCard()" class="text-indigo-600 font-bold hover:underline">Sign In</button>';
+            } else {
+                h1.textContent = 'Welcome Back';
+                p.textContent = 'Enter your details to access Nexus.';
+                btn.textContent = 'Sign In';
+                toggle.innerHTML = "Don't have an account? <button onclick="toggleCard()" class="text-indigo-600 font-bold hover:underline">Create one</button>";
+            }
+        }
+    </script>
+</body>
+</html>

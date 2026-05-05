@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HabitFlow - 30 Day Challenge</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        .habit-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+        .habit-cell {
+            aspect-ratio: 1;
+            transition: all 0.2s;
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-[#FDFCFB] min-h-screen font-sans text-slate-900 p-6 md:p-12">
+    <div class="max-w-4xl mx-auto space-y-10">
+        <!-- Header -->
+        <header class="flex justify-between items-center">
+            <div>
+                <h1 class="text-4xl font-bold tracking-tight">Habit<span class="text-indigo-600">Flow</span></h1>
+                <p class="text-slate-500">Consistency is the key to excellence.</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <button id="addHabitBtn" class="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 transition-all shadow-lg shadow-slate-200">
+                    <i data-lucide="plus" class="w-5 h-5"></i>
+                    <span>New Habit</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Stats Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="p-6 bg-white rounded-3xl border border-slate-100 shadow-sm">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Active Habits</p>
+                <h2 id="activeCount" class="text-3xl font-bold">0</h2>
+            </div>
+            <div class="p-6 bg-indigo-50 rounded-3xl border border-indigo-100 shadow-sm">
+                <p class="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-1">Best Streak</p>
+                <h2 id="bestStreak" class="text-3xl font-bold text-indigo-600">0 Days</h2>
+            </div>
+            <div class="p-6 bg-emerald-50 rounded-3xl border border-emerald-100 shadow-sm">
+                <p class="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-1">Total Completion</p>
+                <h2 id="totalCompletion" class="text-3xl font-bold text-emerald-600">0%</h2>
+            </div>
+        </div>
+
+        <!-- Habits List -->
+        <div id="habitsList" class="space-y-6">
+            <!-- Habit Item -->
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="habitModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-6 z-50">
+        <div class="bg-white rounded-[2.5rem] p-10 w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200">
+            <h2 class="text-2xl font-bold mb-6">Create New Habit</h2>
+            <form id="habitForm" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-bold text-slate-400 uppercase mb-2">Habit Name</label>
+                    <input type="text" id="habitName" required placeholder="e.g. Read 20 pages"
+                        class="w-full px-6 py-4 bg-slate-50 rounded-2xl border-2 border-transparent focus:border-indigo-500 focus:bg-white outline-none transition-all">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-400 uppercase mb-2">Icon</label>
+                    <div class="flex gap-4">
+                        <select id="habitIcon" class="w-full px-6 py-4 bg-slate-50 rounded-2xl border-2 border-transparent focus:border-indigo-500 focus:bg-white outline-none transition-all">
+                            <option value="book">Book</option>
+                            <option value="dumbbell">Fitness</option>
+                            <option value="droplets">Water</option>
+                            <option value="moon">Sleep</option>
+                            <option value="coffee">Morning</option>
+                            <option value="code">Coding</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex gap-4 pt-4">
+                    <button type="button" id="closeModal" class="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-bold hover:bg-slate-200 transition-all">Cancel</button>
+                    <button type="submit" class="flex-1 py-4 bg-indigo-600 text-white rounded-2xl font-bold hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-200">Start Habit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        let habits = JSON.parse(localStorage.getItem('habits')) || [];
+        const habitsList = document.getElementById('habitsList');
+        const modal = document.getElementById('habitModal');
+        const form = document.getElementById('habitForm');
+
+        function renderHabits() {
+            habitsList.innerHTML = '';
+            if (habits.length === 0) {
+                habitsList.innerHTML = `
+                    <div class="text-center py-20 bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200">
+                        <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i data-lucide="sparkles" class="text-slate-400"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-600">No habits yet</h3>
+                        <p class="text-slate-400">Add a new habit to start your journey.</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            habits.forEach((habit, index) => {
+                const habitEl = document.createElement('div');
+                habitEl.className = 'p-8 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col md:flex-row gap-8 items-center';
+
+                // Get last 7 days completion status
+                const last7Days = [];
+                for (let i = 6; i >= 0; i--) {
+                    const d = new Date();
+                    d.setDate(d.getDate() - i);
+                    const dateStr = d.toISOString().split('T')[0];
+                    last7Days.push({
+                        date: dateStr,
+                        completed: habit.history.includes(dateStr),
+                        label: d.toLocaleDateString('en-US', { weekday: 'short' }).charAt(0)
+                    });
+                }
+
+                habitEl.innerHTML = `
+                    <div class="flex items-center gap-6 flex-grow">
+                        <div class="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center">
+                            <i data-lucide="${habit.icon}" class="w-7 h-7"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold">${habit.name}</h3>
+                            <p class="text-slate-400 text-sm">${habit.history.length} days total</p>
+                        </div>
+                    </div>
+
+                    <div class="habit-grid flex-shrink-0">
+                        ${last7Days.map((day, dIdx) => `
+                            <div class="flex flex-col items-center gap-2">
+                                <span class="text-[10px] font-bold text-slate-400 uppercase">${day.label}</span>
+                                <button onclick="toggleDay(${index}, '${day.date}')"
+                                    class="habit-cell w-10 h-10 rounded-xl border-2 transition-all ${day.completed ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-100 text-transparent'}">
+                                    <i data-lucide="check" class="w-5 h-5 mx-auto"></i>
+                                </button>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <button onclick="deleteHabit(${index})" class="p-4 text-slate-300 hover:text-red-500 transition-colors">
+                        <i data-lucide="trash-2" class="w-5 h-5"></i>
+                    </button>
+                `;
+                habitsList.appendChild(habitEl);
+            });
+            lucide.createIcons();
+            updateStats();
+        }
+
+        function toggleDay(habitIndex, dateStr) {
+            const habit = habits[habitIndex];
+            const historyIndex = habit.history.indexOf(dateStr);
+            if (historyIndex === -1) {
+                habit.history.push(dateStr);
+            } else {
+                habit.history.splice(historyIndex, 1);
+            }
+            saveAndRender();
+        }
+
+        function saveAndRender() {
+            localStorage.setItem('habits', JSON.stringify(habits));
+            renderHabits();
+        }
+
+        function deleteHabit(index) {
+            habits.splice(index, 1);
+            saveAndRender();
+        }
+
+        function updateStats() {
+            document.getElementById('activeCount').textContent = habits.length;
+            // Simplified streak calculation for MVP
+            const best = habits.reduce((max, h) => Math.max(max, h.history.length), 0);
+            document.getElementById('bestStreak').textContent = `${best} Days`;
+        }
+
+        // Modal Logic
+        document.getElementById('addHabitBtn').onclick = () => modal.classList.remove('hidden');
+        document.getElementById('closeModal').onclick = () => modal.classList.add('hidden');
+
+        form.onsubmit = (e) => {
+            e.preventDefault();
+            const newHabit = {
+                name: document.getElementById('habitName').value,
+                icon: document.getElementById('habitIcon').value,
+                history: []
+            };
+            habits.unshift(newHabit);
+            modal.classList.add('hidden');
+            form.reset();
+            saveAndRender();
+        };
+
+        renderHabits();
+    </script>
+</body>
+</html>

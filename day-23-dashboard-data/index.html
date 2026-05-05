@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streamline - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .stat-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .stat-card:hover { transform: translateY(-4px); }
+    </style>
+</head>
+<body class="bg-[#F6F8FB] min-h-screen font-sans text-slate-900">
+
+    <div class="flex h-screen overflow-hidden">
+
+        <!-- Sidebar -->
+        <aside class="hidden xl:flex w-72 bg-white border-r border-slate-200 flex-col">
+            <div class="p-8">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center">
+                        <i data-lucide="layout-dashboard" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <span class="text-2xl font-black tracking-tight">Streamline</span>
+                </div>
+            </div>
+
+            <nav class="flex-grow px-4 space-y-2">
+                <a href="#" class="flex items-center gap-4 px-4 py-3 bg-indigo-50 text-indigo-600 rounded-xl font-bold">
+                    <i data-lucide="bar-chart-2" class="w-5 h-5"></i>
+                    Analytics
+                </a>
+                <a href="#" class="flex items-center gap-4 px-4 py-3 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-xl font-bold transition-all">
+                    <i data-lucide="users" class="w-5 h-5"></i>
+                    Customers
+                </a>
+                <a href="#" class="flex items-center gap-4 px-4 py-3 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-xl font-bold transition-all">
+                    <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+                    Sales
+                </a>
+                <a href="#" class="flex items-center gap-4 px-4 py-3 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-xl font-bold transition-all">
+                    <i data-lucide="settings" class="w-5 h-5"></i>
+                    Settings
+                </a>
+            </nav>
+
+            <div class="p-8 border-t border-slate-100">
+                <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl">
+                    <img src="https://i.pravatar.cc/100?u=admin" class="w-10 h-10 rounded-full">
+                    <div>
+                        <p class="text-sm font-bold">Admin User</p>
+                        <p class="text-[10px] uppercase font-bold text-slate-400">Pro Account</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-grow overflow-y-auto bg-slate-50/50">
+            <header class="p-8 flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold">Global Analytics</h1>
+                    <p class="text-slate-400">Track your performance in real-time.</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="relative">
+                        <i data-lucide="bell" class="w-6 h-6 text-slate-400 cursor-pointer"></i>
+                        <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                    </div>
+                    <button class="px-6 py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition-all">Export Report</button>
+                </div>
+            </header>
+
+            <div class="p-8 space-y-8">
+                <!-- KPI Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="stat-card p-6 bg-white rounded-3xl border border-slate-100 shadow-sm">
+                        <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-6">
+                            <i data-lucide="trending-up" class="w-6 h-6"></i>
+                        </div>
+                        <p class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-1">Total Revenue</p>
+                        <h2 class="text-3xl font-black">$128,430</h2>
+                        <span class="text-xs font-bold text-green-500 mt-2 block">+14.2% from last month</span>
+                    </div>
+                    <div class="stat-card p-6 bg-white rounded-3xl border border-slate-100 shadow-sm">
+                        <div class="w-12 h-12 bg-orange-50 text-orange-600 rounded-2xl flex items-center justify-center mb-6">
+                            <i data-lucide="users" class="w-6 h-6"></i>
+                        </div>
+                        <p class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-1">Active Users</p>
+                        <h2 class="text-3xl font-black">43,201</h2>
+                        <span class="text-xs font-bold text-green-500 mt-2 block">+5.8% from last month</span>
+                    </div>
+                    <div class="stat-card p-6 bg-white rounded-3xl border border-slate-100 shadow-sm">
+                        <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center mb-6">
+                            <i data-lucide="shopping-bag" class="w-6 h-6"></i>
+                        </div>
+                        <p class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-1">Total Orders</p>
+                        <h2 class="text-3xl font-black">2,845</h2>
+                        <span class="text-xs font-bold text-red-500 mt-2 block">-2.1% from last week</span>
+                    </div>
+                    <div class="stat-card p-6 bg-white rounded-3xl border border-slate-100 shadow-sm">
+                        <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mb-6">
+                            <i data-lucide="zap" class="w-6 h-6"></i>
+                        </div>
+                        <p class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-1">Conversion Rate</p>
+                        <h2 class="text-3xl font-black">3.4%</h2>
+                        <span class="text-xs font-bold text-green-500 mt-2 block">+0.4% improvement</span>
+                    </div>
+                </div>
+
+                <!-- Main Chart -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    <div class="lg:col-span-8 bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+                        <div class="flex justify-between items-center mb-10">
+                            <h3 class="text-xl font-bold">Revenue Overview</h3>
+                            <select class="bg-slate-50 border-none rounded-xl px-4 py-2 text-sm font-bold outline-none">
+                                <option>Last 7 Days</option>
+                                <option>Last 30 Days</option>
+                            </select>
+                        </div>
+                        <div class="h-80">
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-4 bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+                        <h3 class="text-xl font-bold mb-8">Recent Transactions</h3>
+                        <div class="space-y-6">
+                            <div class="flex justify-between items-center">
+                                <div class="flex gap-4">
+                                    <div class="w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center font-bold text-xs">JW</div>
+                                    <div>
+                                        <p class="text-sm font-bold">John Wilson</p>
+                                        <p class="text-xs text-slate-400">2 mins ago</p>
+                                    </div>
+                                </div>
+                                <span class="font-bold text-sm">+$430.00</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <div class="flex gap-4">
+                                    <div class="w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center font-bold text-xs">SK</div>
+                                    <div>
+                                        <p class="text-sm font-bold">Sarah King</p>
+                                        <p class="text-xs text-slate-400">15 mins ago</p>
+                                    </div>
+                                </div>
+                                <span class="font-bold text-sm">+$1,290.00</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <div class="flex gap-4">
+                                    <div class="w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center font-bold text-xs">TM</div>
+                                    <div>
+                                        <p class="text-sm font-bold">Tom Miller</p>
+                                        <p class="text-xs text-slate-400">1 hour ago</p>
+                                    </div>
+                                </div>
+                                <span class="font-bold text-sm">+$89.00</span>
+                            </div>
+                        </div>
+                        <button class="w-full mt-10 py-4 bg-slate-50 text-slate-600 rounded-2xl font-bold hover:bg-slate-100 transition-all">View All Activity</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // Chart Init
+        const ctx = document.getElementById('revenueChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                datasets: [{
+                    label: 'Revenue',
+                    data: [12000, 19000, 15000, 25000, 22000, 30000, 45000],
+                    borderColor: '#6366f1',
+                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 4,
+                    pointRadius: 0,
+                    pointHoverRadius: 6,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { borderDash: [5, 5], drawBorder: false },
+                        ticks: { font: { family: 'Outfit', weight: '600' } }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { family: 'Outfit', weight: '600' } }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SocialFlow - Social Media Feed</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        .post-card { border: 1px solid rgba(0,0,0,0.05); }
+        ::-webkit-scrollbar { width: 0px; }
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+        }
+    </style>
+</head>
+<body class="bg-[#FAFAFA] min-h-screen font-sans text-slate-900 pb-20 md:pb-0">
+
+    <!-- Top Nav -->
+    <nav class="glass-nav sticky top-0 z-50 border-b border-slate-100 px-6 py-4">
+        <div class="max-w-xl mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-black tracking-tighter">Social<span class="text-indigo-600">Flow</span></h1>
+            <div class="flex gap-6">
+                <i data-lucide="heart" class="w-6 h-6 cursor-pointer hover:text-red-500 transition-colors"></i>
+                <i data-lucide="message-circle" class="w-6 h-6 cursor-pointer hover:text-indigo-600 transition-colors"></i>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-xl mx-auto py-8 space-y-8">
+
+        <!-- Stories -->
+        <div class="flex gap-4 overflow-x-auto px-6 no-scrollbar">
+            <div class="flex-shrink-0 space-y-2">
+                <div class="w-16 h-16 rounded-full p-1 border-2 border-indigo-600">
+                    <img src="https://i.pravatar.cc/100?u=me" class="w-full h-full rounded-full object-cover">
+                </div>
+                <p class="text-[10px] font-bold text-center truncate w-16">Your Story</p>
+            </div>
+            <div class="flex-shrink-0 space-y-2">
+                <div class="w-16 h-16 rounded-full p-1 border-2 border-pink-500">
+                    <img src="https://i.pravatar.cc/100?u=a" class="w-full h-full rounded-full object-cover">
+                </div>
+                <p class="text-[10px] font-bold text-center truncate w-16">alex_dev</p>
+            </div>
+            <div class="flex-shrink-0 space-y-2">
+                <div class="w-16 h-16 rounded-full p-1 border-2 border-pink-500">
+                    <img src="https://i.pravatar.cc/100?u=b" class="w-full h-full rounded-full object-cover">
+                </div>
+                <p class="text-[10px] font-bold text-center truncate w-16">sarah_k</p>
+            </div>
+            <div class="flex-shrink-0 space-y-2">
+                <div class="w-16 h-16 rounded-full p-1 border-2 border-pink-500">
+                    <img src="https://i.pravatar.cc/100?u=c" class="w-full h-full rounded-full object-cover">
+                </div>
+                <p class="text-[10px] font-bold text-center truncate w-16">mike_codes</p>
+            </div>
+            <div class="flex-shrink-0 space-y-2">
+                <div class="w-16 h-16 rounded-full p-1 border-2 border-pink-500">
+                    <img src="https://i.pravatar.cc/100?u=d" class="w-full h-full rounded-full object-cover">
+                </div>
+                <p class="text-[10px] font-bold text-center truncate w-16">emma_ui</p>
+            </div>
+        </div>
+
+        <!-- Create Post -->
+        <div class="mx-6 p-6 bg-white rounded-3xl post-card">
+            <div class="flex gap-4">
+                <img src="https://i.pravatar.cc/100?u=me" class="w-10 h-10 rounded-full">
+                <textarea id="postText" placeholder="What's on your mind?"
+                    class="flex-grow bg-transparent border-none outline-none resize-none py-2 text-sm font-medium h-12"></textarea>
+            </div>
+            <div class="flex justify-between items-center mt-4 pt-4 border-t border-slate-50">
+                <div class="flex gap-4 text-slate-400">
+                    <i data-lucide="image" class="w-5 h-5 cursor-pointer hover:text-indigo-600 transition-colors"></i>
+                    <i data-lucide="video" class="w-5 h-5 cursor-pointer hover:text-indigo-600 transition-colors"></i>
+                    <i data-lucide="smile" class="w-5 h-5 cursor-pointer hover:text-indigo-600 transition-colors"></i>
+                </div>
+                <button id="postBtn" class="px-6 py-2 bg-indigo-600 text-white rounded-full text-xs font-bold hover:bg-indigo-700 transition-all">Post</button>
+            </div>
+        </div>
+
+        <!-- Feed -->
+        <div id="feed" class="space-y-8 pb-12">
+            <!-- Example Post -->
+            <div class="bg-white md:rounded-3xl post-card overflow-hidden">
+                <div class="p-4 flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <img src="https://i.pravatar.cc/100?u=sarah" class="w-8 h-8 rounded-full">
+                        <div>
+                            <p class="text-sm font-bold leading-none mb-1">sarah_k</p>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">San Francisco, CA</p>
+                        </div>
+                    </div>
+                    <i data-lucide="more-horizontal" class="w-5 h-5 text-slate-400 cursor-pointer"></i>
+                </div>
+                <div class="aspect-square bg-slate-100">
+                    <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&q=80" class="w-full h-full object-cover">
+                </div>
+                <div class="p-6 space-y-4">
+                    <div class="flex justify-between items-center">
+                        <div class="flex gap-6">
+                            <i data-lucide="heart" class="w-6 h-6 cursor-pointer hover:text-red-500 transition-colors"></i>
+                            <i data-lucide="message-circle" class="w-6 h-6 cursor-pointer hover:text-indigo-600 transition-colors"></i>
+                            <i data-lucide="send" class="w-6 h-6 cursor-pointer hover:text-indigo-600 transition-colors"></i>
+                        </div>
+                        <i data-lucide="bookmark" class="w-6 h-6 cursor-pointer hover:text-indigo-600 transition-colors"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-bold mb-1">1,204 likes</p>
+                        <p class="text-sm"><span class="font-bold mr-2">sarah_k</span>Late night coding session at the new office! 💻✨ #setup #devlife</p>
+                    </div>
+                    <p class="text-xs text-slate-400 font-bold uppercase tracking-widest">View all 42 comments</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom Nav (Mobile) -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 glass-nav border-t border-slate-100 px-8 py-4 flex justify-between items-center z-50">
+        <i data-lucide="home" class="w-6 h-6 text-indigo-600"></i>
+        <i data-lucide="search" class="w-6 h-6 text-slate-400"></i>
+        <div class="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center -mt-8 border-4 border-white shadow-xl">
+            <i data-lucide="plus" class="w-6 h-6 text-white"></i>
+        </div>
+        <i data-lucide="video" class="w-6 h-6 text-slate-400"></i>
+        <img src="https://i.pravatar.cc/100?u=me" class="w-6 h-6 rounded-full grayscale">
+    </nav>
+
+    <script>
+        lucide.createIcons();
+
+        const postBtn = document.getElementById('postBtn');
+        const postText = document.getElementById('postText');
+        const feed = document.getElementById('feed');
+
+        postBtn.onclick = () => {
+            const val = postText.value.trim();
+            if (!val) return;
+
+            const div = document.createElement('div');
+            div.className = 'bg-white md:rounded-3xl post-card overflow-hidden animate-in slide-in-from-bottom-4 duration-500';
+            div.innerHTML = `
+                <div class="p-4 flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <img src="https://i.pravatar.cc/100?u=me" class="w-8 h-8 rounded-full">
+                        <div>
+                            <p class="text-sm font-bold leading-none mb-1">jules_dev</p>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Just now</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-6 pb-6 space-y-4">
+                    <p class="text-sm font-medium">${val}</p>
+                    <div class="flex gap-6 text-slate-900">
+                        <i data-lucide="heart" class="w-6 h-6 cursor-pointer hover:text-red-500 transition-colors"></i>
+                        <i data-lucide="message-circle" class="w-6 h-6 cursor-pointer hover:text-indigo-600 transition-colors"></i>
+                    </div>
+                </div>
+            `;
+            feed.prepend(div);
+            lucide.createIcons();
+            postText.value = '';
+        };
+    </script>
+</body>
+</html>

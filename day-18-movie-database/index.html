@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineWave - 30 Day Challenge</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        .movie-card { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .movie-card:hover { transform: scale(1.05); }
+        .glass {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-[#020617] text-slate-300 min-h-screen font-sans">
+    <!-- Navbar -->
+    <nav class="sticky top-0 z-50 glass border-b border-white/5 px-8 py-4">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="p-2 bg-red-600 rounded-lg">
+                    <i data-lucide="clapperboard" class="w-6 h-6 text-white"></i>
+                </div>
+                <span class="text-2xl font-bold text-white tracking-tight">Cine<span class="text-red-600">Wave</span></span>
+            </div>
+            <div class="relative w-full max-w-md ml-8">
+                <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 w-5 h-5"></i>
+                <input type="text" id="searchInput" placeholder="Search movies, TV shows..."
+                    class="w-full bg-slate-900 border border-white/5 rounded-full pl-12 pr-6 py-3 outline-none focus:border-red-600/50 transition-all text-white">
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-8 py-12">
+        <!-- Featured Header -->
+        <div class="mb-12">
+            <h2 class="text-3xl font-bold text-white mb-2">Discover Movies</h2>
+            <p class="text-slate-500">Explore the latest and greatest in cinema.</p>
+        </div>
+
+        <!-- Grid -->
+        <div id="movieGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">
+            <!-- Movie cards will be injected here -->
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading" class="hidden col-span-full text-center py-20">
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-red-600 border-t-transparent"></div>
+        </div>
+    </div>
+
+    <!-- Modal for details -->
+    <div id="movieModal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-6 z-[60]">
+        <div class="bg-slate-900 rounded-[2.5rem] max-w-4xl w-full overflow-hidden flex flex-col md:flex-row relative">
+            <button id="closeModal" class="absolute top-6 right-6 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-all z-10">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+            <div class="w-full md:w-2/5 h-96 md:h-auto">
+                <img id="modalPoster" src="" alt="" class="w-full h-full object-cover">
+            </div>
+            <div class="p-10 md:w-3/5 space-y-6">
+                <div>
+                    <h2 id="modalTitle" class="text-4xl font-bold text-white mb-2"></h2>
+                    <div class="flex flex-wrap gap-3 text-sm font-semibold">
+                        <span id="modalYear" class="text-red-500"></span>
+                        <span id="modalRuntime" class="px-3 py-1 bg-white/5 rounded-full"></span>
+                        <span id="modalGenre" class="px-3 py-1 bg-white/5 rounded-full"></span>
+                    </div>
+                </div>
+                <p id="modalPlot" class="text-slate-400 leading-relaxed text-lg"></p>
+                <div class="grid grid-cols-2 gap-8 pt-6 border-t border-white/5">
+                    <div>
+                        <p class="text-xs uppercase font-bold text-slate-500 mb-1">Director</p>
+                        <p id="modalDirector" class="text-white font-semibold"></p>
+                    </div>
+                    <div>
+                        <p class="text-xs uppercase font-bold text-slate-500 mb-1">Rating</p>
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="star" class="w-4 h-4 text-amber-500 fill-amber-500"></i>
+                            <p id="modalRating" class="text-white font-semibold"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        const API_KEY = '5f2f5341'; // Public OMDb key often used for demos
+        const movieGrid = document.getElementById('movieGrid');
+        const searchInput = document.getElementById('searchInput');
+        const loading = document.getElementById('loading');
+        const modal = document.getElementById('movieModal');
+
+        async function searchMovies(query = 'Avengers') {
+            loading.classList.remove('hidden');
+            movieGrid.innerHTML = '';
+
+            try {
+                const res = await fetch(`https://www.omdbapi.com/?s=${query}&apikey=${API_KEY}`);
+                const data = await res.json();
+
+                loading.classList.add('hidden');
+
+                if (data.Search) {
+                    data.Search.forEach(movie => {
+                        const card = document.createElement('div');
+                        card.className = 'movie-card group cursor-pointer space-y-4';
+                        card.onclick = () => showMovieDetails(movie.imdbID);
+                        card.innerHTML = `
+                            <div class="relative aspect-[2/3] rounded-2xl overflow-hidden bg-slate-800 shadow-2xl">
+                                <img src="${movie.Poster !== 'N/A' ? movie.Poster : 'https://via.placeholder.com/300x450?text=No+Poster'}"
+                                     alt="${movie.Title}" class="w-full h-full object-cover">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6">
+                                    <button class="w-full py-3 bg-red-600 text-white rounded-xl font-bold transform translate-y-4 group-hover:translate-y-0 transition-transform">
+                                        View Details
+                                    </button>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-white truncate text-lg">${movie.Title}</h3>
+                                <p class="text-slate-500 font-medium">${movie.Year}</p>
+                            </div>
+                        `;
+                        movieGrid.appendChild(card);
+                    });
+                } else {
+                    movieGrid.innerHTML = `<div class="col-span-full text-center py-20 text-slate-500">No results found for "${query}"</div>`;
+                }
+            } catch (err) {
+                loading.classList.add('hidden');
+                console.error(err);
+            }
+        }
+
+        async function showMovieDetails(id) {
+            const res = await fetch(`https://www.omdbapi.com/?i=${id}&apikey=${API_KEY}`);
+            const movie = await res.json();
+
+            document.getElementById('modalPoster').src = movie.Poster;
+            document.getElementById('modalTitle').textContent = movie.Title;
+            document.getElementById('modalYear').textContent = movie.Year;
+            document.getElementById('modalRuntime').textContent = movie.Runtime;
+            document.getElementById('modalGenre').textContent = movie.Genre;
+            document.getElementById('modalPlot').textContent = movie.Plot;
+            document.getElementById('modalDirector').textContent = movie.Director;
+            document.getElementById('modalRating').textContent = movie.imdbRating;
+
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            lucide.createIcons();
+        }
+
+        document.getElementById('closeModal').onclick = () => {
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        };
+
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') searchMovies(e.target.value);
+        });
+
+        // Initial Load
+        searchMovies();
+    </script>
+</body>
+</html>
