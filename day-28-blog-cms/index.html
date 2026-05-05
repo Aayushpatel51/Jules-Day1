@@ -64,11 +64,11 @@
         </aside>
 
         <!-- Main Workspace -->
-        <main class="flex-grow overflow-y-auto bg-white">
+        <main class="flex-grow overflow-y-auto bg-[#FBFBFB]">
 
             <!-- List View -->
-            <div id="listView" class="p-8 lg:p-20 space-y-12 bg-[#FBFBFB] min-h-full">
-                <header class="flex justify-between items-center">
+            <div id="listView" class="p-8 lg:p-20 space-y-12 min-h-full">
+                <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                     <div>
                         <h1 class="text-5xl font-serif font-bold">All Posts</h1>
                         <p class="text-slate-400 font-medium mt-2">Managing your digital content effortlessly.</p>
@@ -84,7 +84,7 @@
             </div>
 
             <!-- Editor View -->
-            <div id="editorView" class="hidden h-full flex flex-col">
+            <div id="editorView" class="hidden h-full flex flex-col bg-white">
                 <header class="p-8 border-b border-slate-100 flex justify-between items-center bg-white">
                     <button onclick="setView('list')" class="flex items-center gap-2 text-slate-400 font-bold hover:text-black transition-all">
                         <i data-lucide="arrow-left" class="w-5 h-5"></i>
@@ -118,19 +118,19 @@
             </div>
 
             <!-- Media View -->
-            <div id="mediaView" class="hidden p-8 lg:p-20 space-y-12 bg-[#FBFBFB] min-h-full">
-                <header class="flex justify-between items-center">
+            <div id="mediaView" class="hidden p-8 lg:p-20 space-y-12 min-h-full">
+                <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                     <div>
                         <h1 class="text-5xl font-serif font-bold">Media Library</h1>
                         <p class="text-slate-400 font-medium mt-2">Manage your assets and images.</p>
                     </div>
-                    <label class="px-8 py-4 bg-black text-white rounded-2xl font-bold hover:opacity-80 transition-all shadow-xl shadow-slate-200 cursor-pointer">
+                    <label class="px-8 py-4 bg-black text-white rounded-2xl font-bold hover:opacity-80 transition-all shadow-xl shadow-slate-200 cursor-pointer text-center">
                         Upload Asset
                         <input type="file" id="mediaUpload" accept="image/*" class="hidden">
                     </label>
                 </header>
 
-                <div id="mediaContainer" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                <div id="mediaContainer" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
                     <!-- Media items -->
                 </div>
             </div>
@@ -140,16 +140,16 @@
     <!-- Preview Modal -->
     <div id="previewModal" class="fixed inset-0 z-50 bg-white hidden overflow-y-auto">
         <div class="max-w-4xl mx-auto px-8 py-20 relative">
-            <button onclick="closePreview()" class="fixed top-8 right-8 p-3 bg-slate-100 rounded-full hover:bg-slate-200 transition-all">
+            <button onclick="closePreview()" class="fixed top-8 right-8 p-3 bg-slate-100 rounded-full hover:bg-slate-200 transition-all z-50">
                 <i data-lucide="x" class="w-6 h-6"></i>
             </button>
-            <div class="space-y-8">
+            <div class="space-y-12">
                 <div class="flex items-center gap-4">
-                    <span id="previewDate" class="text-xs font-black uppercase tracking-widest text-indigo-600"></span>
+                    <span id="previewDate" class="text-xs font-black uppercase tracking-widest text-indigo-600 font-bold"></span>
                     <div class="h-px flex-grow bg-slate-100"></div>
                 </div>
-                <h1 id="previewTitle" class="text-6xl font-serif font-bold"></h1>
-                <div id="previewContent" class="prose prose-slate prose-xl max-w-none text-slate-600"></div>
+                <h1 id="previewTitle" class="text-6xl md:text-7xl font-serif font-bold leading-tight"></h1>
+                <div id="previewContent" class="prose prose-slate prose-xl max-w-none text-slate-600 leading-relaxed"></div>
             </div>
         </div>
     </div>
@@ -325,18 +325,37 @@
         function renderMedia(containerId = 'mediaContainer', isSelector = false) {
             const container = document.getElementById(containerId);
             container.innerHTML = '';
+
+            if (media.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full py-20 text-center space-y-4">
+                        <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto">
+                            <i data-lucide="image" class="w-10 h-10 text-slate-300"></i>
+                        </div>
+                        <p class="text-slate-400 font-medium">No media assets found. Upload some!</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
             media.forEach(item => {
                 const div = document.createElement('div');
-                div.className = 'group relative aspect-square rounded-2xl overflow-hidden bg-slate-100 border border-slate-100 cursor-pointer';
+                div.className = 'group relative aspect-square rounded-2xl overflow-hidden bg-white border border-slate-100 cursor-pointer shadow-sm';
                 div.innerHTML = `
                     <img src="${item.url}" class="w-full h-full object-cover transition-transform group-hover:scale-110">
                     ${isSelector ?
                         `<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <span class="text-white text-xs font-bold">Insert</span>
+                            <span class="text-white text-xs font-bold">Insert into Post</span>
                         </div>` :
-                        `<button onclick="deleteMedia(${item.id})" class="absolute top-2 right-2 p-2 bg-white/90 rounded-xl opacity-0 group-hover:opacity-100 transition-all text-red-500 hover:bg-red-500 hover:text-white">
-                            <i data-lucide="trash-2" class="w-4 h-4"></i>
-                        </button>`
+                        `<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                            <button onclick="copyMediaUrl('${item.url}')" class="p-2 bg-white rounded-lg text-slate-900 hover:bg-slate-50 transition-all" title="Copy URL">
+                                <i data-lucide="copy" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="deleteMedia(${item.id})" class="p-2 bg-white rounded-lg text-red-500 hover:bg-red-500 hover:text-white transition-all" title="Delete">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>`
                     }
                 `;
                 if (isSelector) {
@@ -345,6 +364,13 @@
                 container.appendChild(div);
             });
             lucide.createIcons();
+        }
+
+        function copyMediaUrl(url) {
+            event.stopPropagation();
+            navigator.clipboard.writeText(url).then(() => {
+                alert('URL copied to clipboard!');
+            });
         }
 
         document.getElementById('mediaUpload').onchange = (e) => {
@@ -380,10 +406,19 @@
         }
 
         function insertMedia(url) {
-            const img = `<img src="${url}" class="rounded-2xl my-8 w-full">`;
+            const imgHtml = `
+                <div class="my-12 group relative">
+                    <img src="${url}" class="rounded-[2rem] w-full shadow-lg border border-slate-100">
+                    <div class="absolute -top-4 -right-4 bg-white shadow-xl p-2 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity">
+                        <i data-lucide="image" class="w-4 h-4 text-indigo-600"></i>
+                    </div>
+                </div>
+                <p><br></p>
+            `;
             document.getElementById('postEditor').focus();
-            document.execCommand('insertHTML', false, img);
+            document.execCommand('insertHTML', false, imgHtml);
             closeMediaSelector();
+            lucide.createIcons();
         }
 
         // Initialize
