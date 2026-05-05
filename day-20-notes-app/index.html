@@ -76,9 +76,21 @@
                 </div>
             </header>
 
-            <div class="flex-grow px-12 pb-12 overflow-hidden flex flex-col">
+            <!-- Editor Container -->
+            <div id="editorContainer" class="flex-grow px-12 pb-12 overflow-hidden flex flex-col">
                 <input type="text" id="noteTitle" placeholder="Note Title"
-                    class="w-full bg-transparent text-5xl font-bold border-none outline-none mb-8 placeholder:text-slate-200 text-slate-900">
+                    class="w-full bg-transparent text-5xl font-bold border-none outline-none mb-4 placeholder:text-slate-200 text-slate-900">
+
+                <!-- Toolbar -->
+                <div id="toolbar" class="flex items-center gap-2 mb-6 p-2 bg-white rounded-2xl border border-slate-100 shadow-sm w-fit">
+                    <button onclick="insertMarkdown('**', '**')" class="p-2 hover:bg-slate-50 rounded-lg text-slate-600" title="Bold"><i data-lucide="bold" class="w-4 h-4"></i></button>
+                    <button onclick="insertMarkdown('*', '*')" class="p-2 hover:bg-slate-50 rounded-lg text-slate-600" title="Italic"><i data-lucide="italic" class="w-4 h-4"></i></button>
+                    <button onclick="insertMarkdown('[', '](url)')" class="p-2 hover:bg-slate-50 rounded-lg text-slate-600" title="Link"><i data-lucide="link" class="w-4 h-4"></i></button>
+                    <button onclick="insertMarkdown('![alt](', 'url)')" class="p-2 hover:bg-slate-50 rounded-lg text-slate-600" title="Image"><i data-lucide="image" class="w-4 h-4"></i></button>
+                    <button onclick="insertMarkdown('- ', '')" class="p-2 hover:bg-slate-50 rounded-lg text-slate-600" title="List"><i data-lucide="list" class="w-4 h-4"></i></button>
+                    <button onclick="insertMarkdown('1. ', '')" class="p-2 hover:bg-slate-50 rounded-lg text-slate-600" title="Numbered List"><i data-lucide="list-ordered" class="w-4 h-4"></i></button>
+                    <button onclick="insertEmoji('✨')" class="p-2 hover:bg-slate-50 rounded-lg text-slate-600" title="Emoji"><i data-lucide="smile" class="w-4 h-4"></i></button>
+                </div>
 
                 <div class="flex-grow relative">
                     <textarea id="noteContent" placeholder="Start writing your masterpiece..."
@@ -88,6 +100,18 @@
                         <!-- Markdown Preview -->
                     </div>
                 </div>
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="hidden flex-grow flex flex-col items-center justify-center space-y-4 text-center">
+                <div class="p-6 bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50">
+                    <i data-lucide="feather" class="w-12 h-12 text-indigo-500"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-900">No notes found</h2>
+                <p class="text-slate-500 max-w-xs">Create a new note to start capturing your ideas and inspirations.</p>
+                <button onclick="document.getElementById('addNoteBtn').click()" class="mt-4 px-8 py-4 bg-indigo-600 text-white rounded-2xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200">
+                    Create your first note
+                </button>
             </div>
         </main>
     </div>
@@ -126,17 +150,32 @@
         }
 
         function selectNote(id) {
-            saveNote(); // Save current before switching
+            if (activeNoteId) saveNote();
+
             activeNoteId = id;
             const note = notes.find(n => n.id === id);
-            titleInput.value = note.title;
-            contentInput.value = note.content;
+
+            if (note) {
+                document.getElementById('editorContainer').classList.remove('hidden');
+                document.getElementById('emptyState').classList.add('hidden');
+                document.getElementById('deleteBtn').classList.remove('hidden');
+                document.getElementById('previewToggle').classList.remove('hidden');
+
+                titleInput.value = note.title;
+                contentInput.value = note.content;
+            } else {
+                document.getElementById('editorContainer').classList.add('hidden');
+                document.getElementById('emptyState').classList.remove('hidden');
+                document.getElementById('deleteBtn').classList.add('hidden');
+                document.getElementById('previewToggle').classList.add('hidden');
+            }
 
             if (!previewArea.classList.contains('hidden')) togglePreview();
             renderNotesList();
         }
 
         function saveNote() {
+            if (!activeNoteId) return;
             const note = notes.find(n => n.id === activeNoteId);
             if (!note) return;
 
@@ -157,12 +196,34 @@
                 previewArea.innerHTML = marked.parse(contentInput.value);
                 previewArea.classList.remove('hidden');
                 contentInput.classList.add('invisible');
+                titleInput.readOnly = true;
+                document.getElementById('toolbar').classList.add('opacity-50', 'pointer-events-none');
                 document.querySelector('#previewToggle span').textContent = 'Edit';
             } else {
                 previewArea.classList.add('hidden');
                 contentInput.classList.remove('invisible');
+                titleInput.readOnly = false;
+                document.getElementById('toolbar').classList.remove('opacity-50', 'pointer-events-none');
                 document.querySelector('#previewToggle span').textContent = 'Preview';
             }
+        }
+
+        function insertMarkdown(before, after) {
+            const start = contentInput.selectionStart;
+            const end = contentInput.selectionEnd;
+            const text = contentInput.value;
+            const beforeText = text.substring(0, start);
+            const selection = text.substring(start, end);
+            const afterText = text.substring(end);
+
+            contentInput.value = beforeText + before + selection + after + afterText;
+            contentInput.focus();
+            contentInput.setSelectionRange(start + before.length, end + before.length);
+            triggerSave();
+        }
+
+        function insertEmoji(emoji) {
+            insertMarkdown(emoji, '');
         }
 
         document.getElementById('addNoteBtn').onclick = () => {
@@ -179,13 +240,13 @@
 
         document.getElementById('deleteBtn').onclick = () => {
             notes = notes.filter(n => n.id !== activeNoteId);
-            if (notes.length > 0) selectNote(notes[0].id);
-            else {
+            localStorage.setItem('zennotes', JSON.stringify(notes));
+            if (notes.length > 0) {
+                selectNote(notes[0].id);
+            } else {
                 activeNoteId = null;
-                titleInput.value = '';
-                contentInput.value = '';
+                selectNote(null);
             }
-            saveNote();
         };
 
         document.getElementById('previewToggle').onclick = togglePreview;
