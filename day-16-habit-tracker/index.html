@@ -83,9 +83,9 @@
                     <input type="text" id="habitName" required placeholder="e.g. Read 20 pages"
                         class="w-full px-6 py-4 bg-slate-50 rounded-2xl border-2 border-transparent focus:border-indigo-500 focus:bg-white outline-none transition-all">
                 </div>
-                <div>
-                    <label class="block text-sm font-bold text-slate-400 uppercase mb-2">Icon</label>
-                    <div class="flex gap-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-400 uppercase mb-2">Icon</label>
                         <select id="habitIcon" class="w-full px-6 py-4 bg-slate-50 rounded-2xl border-2 border-transparent focus:border-indigo-500 focus:bg-white outline-none transition-all">
                             <option value="book">Book</option>
                             <option value="dumbbell">Fitness</option>
@@ -93,6 +93,16 @@
                             <option value="moon">Sleep</option>
                             <option value="coffee">Morning</option>
                             <option value="code">Coding</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-400 uppercase mb-2">Duration</label>
+                        <select id="habitDuration" class="w-full px-6 py-4 bg-slate-50 rounded-2xl border-2 border-transparent focus:border-indigo-500 focus:bg-white outline-none transition-all">
+                            <option value="7">7 Days</option>
+                            <option value="21">21 Days</option>
+                            <option value="30" selected>30 Days</option>
+                            <option value="60">60 Days</option>
+                            <option value="90">90 Days</option>
                         </select>
                     </div>
                 </div>
@@ -125,6 +135,7 @@
                     </div>
                 `;
                 lucide.createIcons();
+                updateStats();
                 return;
             }
 
@@ -152,7 +163,7 @@
                         </div>
                         <div>
                             <h3 class="text-xl font-bold">${habit.name}</h3>
-                            <p class="text-slate-400 text-sm">${habit.history.length} days total</p>
+                            <p class="text-slate-400 text-sm">${habit.history.length} / ${habit.duration || 30} days total</p>
                         </div>
                     </div>
 
@@ -199,11 +210,46 @@
             saveAndRender();
         }
 
+        function calculateStreak(history) {
+            if (!history || history.length === 0) return 0;
+            const sortedDates = [...history].sort((a, b) => new Date(b) - new Date(a));
+
+            let streak = 0;
+            let currentDate = new Date();
+            currentDate.setHours(0, 0, 0, 0);
+
+            const mostRecent = new Date(sortedDates[0]);
+            mostRecent.setHours(0, 0, 0, 0);
+
+            const diffDays = Math.floor((currentDate - mostRecent) / (1000 * 60 * 60 * 24));
+            if (diffDays > 1) return 0;
+
+            let expectedDate = mostRecent;
+            for (const dateStr of sortedDates) {
+                const date = new Date(dateStr);
+                date.setHours(0, 0, 0, 0);
+
+                if (date.getTime() === expectedDate.getTime()) {
+                    streak++;
+                    expectedDate.setDate(expectedDate.getDate() - 1);
+                } else {
+                    break;
+                }
+            }
+            return streak;
+        }
+
         function updateStats() {
             document.getElementById('activeCount').textContent = habits.length;
-            // Simplified streak calculation for MVP
-            const best = habits.reduce((max, h) => Math.max(max, h.history.length), 0);
+
+            const streaks = habits.map(h => calculateStreak(h.history));
+            const best = habits.length > 0 ? Math.max(...streaks) : 0;
             document.getElementById('bestStreak').textContent = `${best} Days`;
+
+            const totalChecks = habits.reduce((sum, h) => sum + h.history.length, 0);
+            const totalGoal = habits.reduce((sum, h) => sum + (parseInt(h.duration) || 30), 0);
+            const completion = totalGoal > 0 ? Math.round((totalChecks / totalGoal) * 100) : 0;
+            document.getElementById('totalCompletion').textContent = `${completion}%`;
         }
 
         // Modal Logic
@@ -215,6 +261,7 @@
             const newHabit = {
                 name: document.getElementById('habitName').value,
                 icon: document.getElementById('habitIcon').value,
+                duration: document.getElementById('habitDuration').value,
                 history: []
             };
             habits.unshift(newHabit);
