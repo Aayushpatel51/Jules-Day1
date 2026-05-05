@@ -58,7 +58,7 @@
                 <div class="p-8 rounded-[2rem] bg-indigo-600 text-white shadow-xl shadow-indigo-500/20 relative overflow-hidden">
                     <div class="relative z-10">
                         <p class="text-indigo-100 font-medium mb-1">Total Balance</p>
-                        <h2 id="totalBalance" class="text-4xl font-bold">$0.00</h2>
+                        <h2 id="totalBalance" class="text-4xl font-bold">₹0.00</h2>
                     </div>
                     <i data-lucide="wallet" class="absolute -right-4 -bottom-4 w-32 h-32 text-indigo-500/20 rotate-12"></i>
                 </div>
@@ -169,7 +169,7 @@
                             </div>
                         </div>
                         <div class="flex items-center gap-4">
-                            <span class="font-bold text-slate-900 dark:text-white">$${t.amount.toFixed(2)}</span>
+                            <span class="font-bold text-slate-900 dark:text-white">₹${t.amount.toFixed(2)}</span>
                             <button onclick="deleteTransaction(${index})" class="p-2 text-slate-300 hover:text-red-500 transition-colors">
                                 <i data-lucide="trash-2" class="w-4 h-4"></i>
                             </button>
@@ -180,7 +180,7 @@
                 lucide.createIcons();
             }
 
-            totalBalance.textContent = `$${balance.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+            totalBalance.textContent = `₹${balance.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
             updateChart(categories);
             localStorage.setItem('transactions', JSON.stringify(transactions));
         }
