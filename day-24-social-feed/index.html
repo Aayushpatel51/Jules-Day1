@@ -25,6 +25,11 @@
             background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(20px);
         }
+        .story-ring {
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body class="bg-[#FAFAFA] min-h-screen font-sans text-slate-900 pb-20 md:pb-0">
@@ -43,60 +48,92 @@
     <main class="max-w-xl mx-auto py-8 space-y-8">
 
         <!-- Stories -->
-        <div class="flex gap-4 overflow-x-auto px-6 no-scrollbar">
-            <div class="flex-shrink-0 space-y-2">
-                <div class="w-16 h-16 rounded-full p-1 border-2 border-indigo-600">
-                    <img src="https://i.pravatar.cc/100?u=me" class="w-full h-full rounded-full object-cover">
+        <div class="flex gap-4 overflow-x-auto px-6 no-scrollbar" id="storiesContainer">
+            <div class="flex-shrink-0 space-y-2 cursor-pointer story-item" data-user="Your Story" data-img="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80">
+                <div class="w-16 h-16 rounded-full p-0.5 story-ring">
+                    <div class="w-full h-full rounded-full border-2 border-white overflow-hidden">
+                        <img src="https://i.pravatar.cc/100?u=me" class="w-full h-full object-cover">
+                    </div>
                 </div>
                 <p class="text-[10px] font-bold text-center truncate w-16">Your Story</p>
             </div>
-            <div class="flex-shrink-0 space-y-2">
-                <div class="w-16 h-16 rounded-full p-1 border-2 border-pink-500">
-                    <img src="https://i.pravatar.cc/100?u=a" class="w-full h-full rounded-full object-cover">
+            <div class="flex-shrink-0 space-y-2 cursor-pointer story-item" data-user="alex_dev" data-img="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&q=80">
+                <div class="w-16 h-16 rounded-full p-0.5 story-ring">
+                    <div class="w-full h-full rounded-full border-2 border-white overflow-hidden">
+                        <img src="https://i.pravatar.cc/100?u=a" class="w-full h-full object-cover">
+                    </div>
                 </div>
                 <p class="text-[10px] font-bold text-center truncate w-16">alex_dev</p>
             </div>
-            <div class="flex-shrink-0 space-y-2">
-                <div class="w-16 h-16 rounded-full p-1 border-2 border-pink-500">
-                    <img src="https://i.pravatar.cc/100?u=b" class="w-full h-full rounded-full object-cover">
+            <div class="flex-shrink-0 space-y-2 cursor-pointer story-item" data-user="sarah_k" data-img="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&q=80">
+                <div class="w-16 h-16 rounded-full p-0.5 story-ring">
+                    <div class="w-full h-full rounded-full border-2 border-white overflow-hidden">
+                        <img src="https://i.pravatar.cc/100?u=b" class="w-full h-full object-cover">
+                    </div>
                 </div>
                 <p class="text-[10px] font-bold text-center truncate w-16">sarah_k</p>
             </div>
-            <div class="flex-shrink-0 space-y-2">
-                <div class="w-16 h-16 rounded-full p-1 border-2 border-pink-500">
-                    <img src="https://i.pravatar.cc/100?u=c" class="w-full h-full rounded-full object-cover">
+            <div class="flex-shrink-0 space-y-2 cursor-pointer story-item" data-user="mike_codes" data-img="https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&q=80">
+                <div class="w-16 h-16 rounded-full p-0.5 story-ring">
+                    <div class="w-full h-full rounded-full border-2 border-white overflow-hidden">
+                        <img src="https://i.pravatar.cc/100?u=c" class="w-full h-full object-cover">
+                    </div>
                 </div>
                 <p class="text-[10px] font-bold text-center truncate w-16">mike_codes</p>
-            </div>
-            <div class="flex-shrink-0 space-y-2">
-                <div class="w-16 h-16 rounded-full p-1 border-2 border-pink-500">
-                    <img src="https://i.pravatar.cc/100?u=d" class="w-full h-full rounded-full object-cover">
-                </div>
-                <p class="text-[10px] font-bold text-center truncate w-16">emma_ui</p>
             </div>
         </div>
 
         <!-- Create Post -->
-        <div class="mx-6 p-6 bg-white rounded-3xl post-card">
+        <div class="mx-6 p-6 bg-white rounded-3xl post-card shadow-sm">
             <div class="flex gap-4">
                 <img src="https://i.pravatar.cc/100?u=me" class="w-10 h-10 rounded-full">
                 <textarea id="postText" placeholder="What's on your mind?"
                     class="flex-grow bg-transparent border-none outline-none resize-none py-2 text-sm font-medium h-12"></textarea>
             </div>
+
+            <!-- Media Preview -->
+            <div id="mediaPreview" class="mt-4 hidden relative rounded-2xl overflow-hidden border border-slate-100">
+                <img id="imgPreview" class="w-full h-48 object-cover hidden">
+                <video id="videoPreview" class="w-full h-48 object-cover hidden" muted loop></video>
+                <button id="clearMedia" class="absolute top-2 right-2 bg-black/50 text-white p-1 rounded-full hover:bg-black/70">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+
             <div class="flex justify-between items-center mt-4 pt-4 border-t border-slate-50">
                 <div class="flex gap-4 text-slate-400">
-                    <i data-lucide="image" class="w-5 h-5 cursor-pointer hover:text-indigo-600 transition-colors"></i>
-                    <i data-lucide="video" class="w-5 h-5 cursor-pointer hover:text-indigo-600 transition-colors"></i>
-                    <i data-lucide="smile" class="w-5 h-5 cursor-pointer hover:text-indigo-600 transition-colors"></i>
+                    <label class="cursor-pointer hover:text-indigo-600 transition-colors">
+                        <i data-lucide="image" class="w-5 h-5"></i>
+                        <input type="file" id="imageInput" accept="image/*" class="hidden">
+                    </label>
+                    <label class="cursor-pointer hover:text-indigo-600 transition-colors">
+                        <i data-lucide="video" class="w-5 h-5"></i>
+                        <input type="file" id="videoInput" accept="video/*" class="hidden">
+                    </label>
+                    <div class="relative">
+                        <i data-lucide="smile" id="emojiBtn" class="w-5 h-5 cursor-pointer hover:text-indigo-600 transition-colors"></i>
+                        <div id="emojiPicker" class="hidden absolute bottom-full left-0 mb-2 p-2 bg-white rounded-xl shadow-xl border border-slate-100 grid grid-cols-5 gap-2 z-50 w-48">
+                            <button class="emoji-btn hover:bg-slate-50 p-1 rounded">✨</button>
+                            <button class="emoji-btn hover:bg-slate-50 p-1 rounded">🔥</button>
+                            <button class="emoji-btn hover:bg-slate-50 p-1 rounded">💻</button>
+                            <button class="emoji-btn hover:bg-slate-50 p-1 rounded">🚀</button>
+                            <button class="emoji-btn hover:bg-slate-50 p-1 rounded">❤️</button>
+                            <button class="emoji-btn hover:bg-slate-50 p-1 rounded">🙌</button>
+                            <button class="emoji-btn hover:bg-slate-50 p-1 rounded">💯</button>
+                            <button class="emoji-btn hover:bg-slate-50 p-1 rounded">⚡</button>
+                            <button class="emoji-btn hover:bg-slate-50 p-1 rounded">🎨</button>
+                            <button class="emoji-btn hover:bg-slate-50 p-1 rounded">✅</button>
+                        </div>
+                    </div>
                 </div>
-                <button id="postBtn" class="px-6 py-2 bg-indigo-600 text-white rounded-full text-xs font-bold hover:bg-indigo-700 transition-all">Post</button>
+                <button id="postBtn" class="px-6 py-2 bg-indigo-600 text-white rounded-full text-xs font-bold hover:bg-indigo-700 transition-all disabled:opacity-50">Post</button>
             </div>
         </div>
 
         <!-- Feed -->
-        <div id="feed" class="space-y-8 pb-12">
-            <!-- Example Post -->
-            <div class="bg-white md:rounded-3xl post-card overflow-hidden">
+        <div id="feed" class="space-y-8 pb-12 px-6 md:px-0">
+            <!-- Initial Post -->
+            <div class="bg-white rounded-3xl post-card overflow-hidden shadow-sm">
                 <div class="p-4 flex justify-between items-center">
                     <div class="flex items-center gap-3">
                         <img src="https://i.pravatar.cc/100?u=sarah" class="w-8 h-8 rounded-full">
@@ -113,21 +150,39 @@
                 <div class="p-6 space-y-4">
                     <div class="flex justify-between items-center">
                         <div class="flex gap-6">
-                            <i data-lucide="heart" class="w-6 h-6 cursor-pointer hover:text-red-500 transition-colors"></i>
+                            <button class="like-btn group flex items-center gap-1.5" data-likes="1204">
+                                <i data-lucide="heart" class="w-6 h-6 group-hover:text-red-500 transition-colors"></i>
+                                <span class="text-sm font-bold like-count">1,204</span>
+                            </button>
                             <i data-lucide="message-circle" class="w-6 h-6 cursor-pointer hover:text-indigo-600 transition-colors"></i>
                             <i data-lucide="send" class="w-6 h-6 cursor-pointer hover:text-indigo-600 transition-colors"></i>
                         </div>
                         <i data-lucide="bookmark" class="w-6 h-6 cursor-pointer hover:text-indigo-600 transition-colors"></i>
                     </div>
                     <div>
-                        <p class="text-sm font-bold mb-1">1,204 likes</p>
                         <p class="text-sm"><span class="font-bold mr-2">sarah_k</span>Late night coding session at the new office! 💻✨ #setup #devlife</p>
                     </div>
-                    <p class="text-xs text-slate-400 font-bold uppercase tracking-widest">View all 42 comments</p>
                 </div>
             </div>
         </div>
     </main>
+
+    <!-- Story Modal -->
+    <div id="storyModal" class="fixed inset-0 z-[100] bg-black hidden flex items-center justify-center">
+        <button id="closeStory" class="absolute top-6 right-6 text-white z-50">
+            <i data-lucide="x" class="w-8 h-8"></i>
+        </button>
+        <div class="w-full max-w-lg aspect-[9/16] relative bg-slate-900 rounded-none md:rounded-3xl overflow-hidden">
+            <div class="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/60 to-transparent flex items-center gap-3 z-10">
+                <img id="storyUserImg" src="" class="w-8 h-8 rounded-full border-2 border-white">
+                <span id="storyUserName" class="text-white text-sm font-bold"></span>
+            </div>
+            <div class="h-1 absolute top-2 left-4 right-4 bg-white/20 rounded-full z-10 overflow-hidden">
+                <div id="storyProgress" class="h-full bg-white w-0"></div>
+            </div>
+            <img id="storyContent" src="" class="w-full h-full object-cover">
+        </div>
+    </div>
 
     <!-- Bottom Nav (Mobile) -->
     <nav class="md:hidden fixed bottom-0 left-0 right-0 glass-nav border-t border-slate-100 px-8 py-4 flex justify-between items-center z-50">
@@ -143,16 +198,85 @@
     <script>
         lucide.createIcons();
 
+        const feed = document.getElementById('feed');
         const postBtn = document.getElementById('postBtn');
         const postText = document.getElementById('postText');
-        const feed = document.getElementById('feed');
+        const imageInput = document.getElementById('imageInput');
+        const videoInput = document.getElementById('videoInput');
+        const mediaPreview = document.getElementById('mediaPreview');
+        const imgPreview = document.getElementById('imgPreview');
+        const videoPreview = document.getElementById('videoPreview');
+        const clearMedia = document.getElementById('clearMedia');
+        const emojiBtn = document.getElementById('emojiBtn');
+        const emojiPicker = document.getElementById('emojiPicker');
 
+        let attachedMedia = null;
+
+        // Emoji Picker
+        emojiBtn.onclick = (e) => {
+            e.stopPropagation();
+            emojiPicker.classList.toggle('hidden');
+        };
+        document.addEventListener('click', () => emojiPicker.classList.add('hidden'));
+        document.querySelectorAll('.emoji-btn').forEach(btn => {
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                postText.value += btn.innerText;
+                emojiPicker.classList.add('hidden');
+            };
+        });
+
+        // Media Handling
+        const handleFile = (file) => {
+            if (!file) return;
+            const url = URL.createObjectURL(file);
+            attachedMedia = { url, type: file.type.startsWith('video') ? 'video' : 'image' };
+
+            mediaPreview.classList.remove('hidden');
+            if (attachedMedia.type === 'video') {
+                imgPreview.classList.add('hidden');
+                videoPreview.classList.remove('hidden');
+                videoPreview.src = url;
+                videoPreview.play();
+            } else {
+                videoPreview.classList.add('hidden');
+                imgPreview.classList.remove('hidden');
+                imgPreview.src = url;
+            }
+        };
+
+        imageInput.onchange = (e) => handleFile(e.target.files[0]);
+        videoInput.onchange = (e) => handleFile(e.target.files[0]);
+        clearMedia.onclick = () => {
+            attachedMedia = null;
+            mediaPreview.classList.add('hidden');
+            imgPreview.src = '';
+            videoPreview.src = '';
+            imageInput.value = '';
+            videoInput.value = '';
+        };
+
+        // Create Post
         postBtn.onclick = () => {
             const val = postText.value.trim();
-            if (!val) return;
+            if (!val && !attachedMedia) return;
 
             const div = document.createElement('div');
-            div.className = 'bg-white md:rounded-3xl post-card overflow-hidden animate-in slide-in-from-bottom-4 duration-500';
+            div.className = 'bg-white rounded-3xl post-card overflow-hidden shadow-sm animate-in slide-in-from-bottom-4 duration-500';
+
+            let mediaHtml = '';
+            if (attachedMedia) {
+                if (attachedMedia.type === 'video') {
+                    mediaHtml = `<div class="aspect-square bg-slate-100">
+                        <video src="${attachedMedia.url}" class="w-full h-full object-cover" controls loop></video>
+                    </div>`;
+                } else {
+                    mediaHtml = `<div class="aspect-square bg-slate-100">
+                        <img src="${attachedMedia.url}" class="w-full h-full object-cover">
+                    </div>`;
+                }
+            }
+
             div.innerHTML = `
                 <div class="p-4 flex justify-between items-center">
                     <div class="flex items-center gap-3">
@@ -162,18 +286,102 @@
                             <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Just now</p>
                         </div>
                     </div>
+                    <i data-lucide="more-horizontal" class="w-5 h-5 text-slate-400 cursor-pointer"></i>
                 </div>
-                <div class="px-6 pb-6 space-y-4">
-                    <p class="text-sm font-medium">${val}</p>
-                    <div class="flex gap-6 text-slate-900">
-                        <i data-lucide="heart" class="w-6 h-6 cursor-pointer hover:text-red-500 transition-colors"></i>
-                        <i data-lucide="message-circle" class="w-6 h-6 cursor-pointer hover:text-indigo-600 transition-colors"></i>
+                ${mediaHtml}
+                <div class="p-6 space-y-4">
+                    <div class="flex justify-between items-center">
+                        <div class="flex gap-6">
+                            <button class="like-btn group flex items-center gap-1.5" data-likes="0">
+                                <i data-lucide="heart" class="w-6 h-6 group-hover:text-red-500 transition-colors"></i>
+                                <span class="text-sm font-bold like-count">0</span>
+                            </button>
+                            <i data-lucide="message-circle" class="w-6 h-6 cursor-pointer hover:text-indigo-600 transition-colors"></i>
+                            <i data-lucide="send" class="w-6 h-6 cursor-pointer hover:text-indigo-600 transition-colors"></i>
+                        </div>
+                        <i data-lucide="bookmark" class="w-6 h-6 cursor-pointer hover:text-indigo-600 transition-colors"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm"><span class="font-bold mr-2">jules_dev</span>${val}</p>
                     </div>
                 </div>
             `;
             feed.prepend(div);
+            initLikeButtons(div);
             lucide.createIcons();
+
+            // Reset
             postText.value = '';
+            clearMedia.click();
+        };
+
+        // Like Logic
+        function initLikeButtons(container) {
+            const btns = container.querySelectorAll('.like-btn');
+            btns.forEach(btn => {
+                btn.onclick = () => {
+                    const icon = btn.querySelector('i, svg');
+                    const countSpan = btn.querySelector('.like-count');
+                    let count = parseInt(btn.dataset.likes);
+
+                    const isLiked = btn.classList.contains('liked');
+                    if (isLiked) {
+                        btn.classList.remove('liked');
+                        icon.setAttribute('fill', 'none');
+                        icon.classList.remove('text-red-500');
+                        count--;
+                    } else {
+                        btn.classList.add('liked');
+                        icon.setAttribute('fill', 'currentColor');
+                        icon.classList.add('text-red-500');
+                        count++;
+                    }
+
+                    btn.dataset.likes = count;
+                    countSpan.innerText = count.toLocaleString();
+                };
+            });
+        }
+        initLikeButtons(document);
+
+        // Story Logic
+        const storyModal = document.getElementById('storyModal');
+        const closeStory = document.getElementById('closeStory');
+        const storyContent = document.getElementById('storyContent');
+        const storyUserName = document.getElementById('storyUserName');
+        const storyUserImg = document.getElementById('storyUserImg');
+        const storyProgress = document.getElementById('storyProgress');
+        let storyTimer;
+
+        document.querySelectorAll('.story-item').forEach(item => {
+            item.onclick = () => {
+                const user = item.dataset.user;
+                const img = item.dataset.img;
+                const userImg = item.querySelector('img').src;
+
+                storyUserName.innerText = user;
+                storyUserImg.src = userImg;
+                storyContent.src = img;
+                storyModal.classList.remove('hidden');
+
+                // Progress Bar
+                storyProgress.style.width = '0%';
+                let width = 0;
+                clearInterval(storyTimer);
+                storyTimer = setInterval(() => {
+                    width += 1;
+                    storyProgress.style.width = width + '%';
+                    if (width >= 100) {
+                        clearInterval(storyTimer);
+                        closeStory.click();
+                    }
+                }, 30);
+            };
+        });
+
+        closeStory.onclick = () => {
+            storyModal.classList.add('hidden');
+            clearInterval(storyTimer);
         };
     </script>
 </body>
