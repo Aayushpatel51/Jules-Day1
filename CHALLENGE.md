@@ -9,7 +9,7 @@ Welcome to your 30-day coding challenge! This roadmap is designed to help you bu
 
 ## Progress Tracking
 - [x] Day 01: Personal Portfolio Landing Page
-- [ ] Day 02: Pomodoro Timer
+- [x] Day 02: Pomodoro Timer
 - [ ] Day 03: Weather App
 - [ ] Day 04: To-Do List with LocalStorage
 - [ ] Day 05: Random Quote Generator

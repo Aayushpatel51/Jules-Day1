@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aesthetic Pomodoro Timer | Day 02</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; transition: background-color 0.3s, color 0.3s; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .progress-ring__circle {
+            transition: stroke-dashoffset 0.35s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex flex-col items-center justify-center p-4">
+
+    <!-- Theme Toggle -->
+    <button id="theme-toggle" class="fixed top-6 right-6 p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
+        <i data-lucide="sun" class="hidden dark:block"></i>
+        <i data-lucide="moon" class="block dark:hidden"></i>
+    </button>
+
+    <div class="max-w-md w-full space-y-8 text-center">
+        <!-- Header -->
+        <header>
+            <h1 class="text-3xl font-bold tracking-tight">Focus.</h1>
+            <p class="text-slate-500 dark:text-slate-400 mt-2">Day 02: Pomodoro Timer</p>
+        </header>
+
+        <!-- Timer Section -->
+        <div class="relative flex items-center justify-center">
+            <!-- Progress Ring -->
+            <svg class="w-64 h-64 md:w-80 md:h-80">
+                <circle
+                    class="text-slate-200 dark:text-slate-800"
+                    stroke-width="8"
+                    stroke="currentColor"
+                    fill="transparent"
+                    r="120"
+                    cx="50%"
+                    cy="50%"
+                />
+                <circle
+                    id="progress-ring"
+                    class="progress-ring__circle text-indigo-600 dark:text-indigo-500"
+                    stroke-width="8"
+                    stroke-dasharray="753.98"
+                    stroke-dashoffset="0"
+                    stroke-linecap="round"
+                    stroke="currentColor"
+                    fill="transparent"
+                    r="120"
+                    cx="50%"
+                    cy="50%"
+                />
+            </svg>
+
+            <!-- Time Display -->
+            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                <span id="timer-display" class="text-6xl md:text-7xl font-bold mono">25:00</span>
+                <span id="timer-status" class="text-sm uppercase tracking-widest text-slate-500 dark:text-slate-400 mt-2 font-semibold">Focus</span>
+            </div>
+        </div>
+
+        <!-- Session Counter -->
+        <div id="session-display" class="flex justify-center space-x-2">
+            <div class="h-2 w-8 rounded-full bg-indigo-600"></div>
+            <div class="h-2 w-8 rounded-full bg-slate-200 dark:bg-slate-800"></div>
+            <div class="h-2 w-8 rounded-full bg-slate-200 dark:bg-slate-800"></div>
+            <div class="h-2 w-8 rounded-full bg-slate-200 dark:bg-slate-800"></div>
+        </div>
+
+        <!-- Task Info -->
+        <div class="space-y-4">
+            <input
+                type="text"
+                id="task-input"
+                placeholder="What are you working on?"
+                class="w-full bg-transparent border-b border-slate-300 dark:border-slate-700 py-2 text-center focus:outline-none focus:border-indigo-500 transition-colors"
+            >
+        </div>
+
+        <!-- Controls -->
+        <div class="flex items-center justify-center space-x-6">
+            <button id="settings-btn" class="p-3 text-slate-500 hover:text-indigo-600 transition-colors">
+                <i data-lucide="settings"></i>
+            </button>
+            <button id="main-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white p-6 rounded-full shadow-lg shadow-indigo-500/30 transition-all transform active:scale-95">
+                <i data-lucide="play" id="play-icon" class="w-8 h-8 fill-current"></i>
+                <i data-lucide="pause" id="pause-icon" class="hidden w-8 h-8 fill-current"></i>
+            </button>
+            <button id="reset-btn" class="p-3 text-slate-500 hover:text-red-500 transition-colors">
+                <i data-lucide="rotate-ccw"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center hidden z-50">
+        <div class="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-xl max-w-sm w-full mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold">Settings</h2>
+                <button id="close-settings" class="text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="text-sm font-medium text-slate-500 block mb-1">Focus Time (minutes)</label>
+                    <input type="number" id="focus-input" value="25" class="w-full bg-slate-100 dark:bg-slate-800 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="text-sm font-medium text-slate-500 block mb-1">Short Break (minutes)</label>
+                    <input type="number" id="short-break-input" value="5" class="w-full bg-slate-100 dark:bg-slate-800 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="text-sm font-medium text-slate-500 block mb-1">Long Break (minutes)</label>
+                    <input type="number" id="long-break-input" value="15" class="w-full bg-slate-100 dark:bg-slate-800 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <button id="save-settings" class="w-full bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-700 transition-colors mt-4">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <audio id="notif-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // State
+        let timeLeft;
+        let timerId = null;
+        let isRunning = false;
+        let currentMode = 'focus'; // focus, short, long
+        let sessionCount = 1;
+
+        const settings = {
+            focus: 25,
+            short: 5,
+            long: 15
+        };
+
+        // DOM Elements
+        const timerDisplay = document.getElementById('timer-display');
+        const timerStatus = document.getElementById('timer-status');
+        const progressRing = document.getElementById('progress-ring');
+        const mainBtn = document.getElementById('main-btn');
+        const playIcon = document.getElementById('play-icon');
+        const pauseIcon = document.getElementById('pause-icon');
+        const resetBtn = document.getElementById('reset-btn');
+        const settingsBtn = document.getElementById('settings-btn');
+        const settingsModal = document.getElementById('settings-modal');
+        const closeSettings = document.getElementById('close-settings');
+        const saveSettings = document.getElementById('save-settings');
+        const sessionDisplay = document.getElementById('session-display');
+        const notifSound = document.getElementById('notif-sound');
+
+        const focusInput = document.getElementById('focus-input');
+        const shortBreakInput = document.getElementById('short-break-input');
+        const longBreakInput = document.getElementById('long-break-input');
+
+        const radius = 120;
+        const circumference = 2 * Math.PI * radius;
+
+        // Init
+        function init() {
+            timeLeft = settings.focus * 60;
+            updateDisplay();
+            updateProgress(0);
+            updateSessionDots();
+        }
+
+        function updateDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            const display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            timerDisplay.textContent = display;
+            document.title = `${display} - Focus`;
+        }
+
+        function updateProgress(percent) {
+            const offset = circumference - (percent / 100 * circumference);
+            progressRing.style.strokeDashoffset = offset;
+        }
+
+        function toggleTimer() {
+            if (isRunning) {
+                pauseTimer();
+            } else {
+                startTimer();
+            }
+        }
+
+        function startTimer() {
+            isRunning = true;
+            playIcon.classList.add('hidden');
+            pauseIcon.classList.remove('hidden');
+
+            timerId = setInterval(() => {
+                timeLeft--;
+                updateDisplay();
+
+                const total = settings[currentMode] * 60;
+                const percent = ((total - timeLeft) / total) * 100;
+                updateProgress(percent);
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerId);
+                    handleTimerComplete();
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            isRunning = false;
+            playIcon.classList.remove('hidden');
+            pauseIcon.classList.add('hidden');
+            clearInterval(timerId);
+        }
+
+        function resetTimer() {
+            pauseTimer();
+            timeLeft = settings[currentMode] * 60;
+            updateDisplay();
+            updateProgress(0);
+        }
+
+        function handleTimerComplete() {
+            notifSound.play();
+            isRunning = false;
+            playIcon.classList.remove('hidden');
+            pauseIcon.classList.add('hidden');
+
+            if (currentMode === 'focus') {
+                if (sessionCount % 4 === 0) {
+                    currentMode = 'long';
+                    timerStatus.textContent = 'Long Break';
+                    timeLeft = settings.long * 60;
+                } else {
+                    currentMode = 'short';
+                    timerStatus.textContent = 'Short Break';
+                    timeLeft = settings.short * 60;
+                }
+            } else {
+                currentMode = 'focus';
+                timerStatus.textContent = 'Focus';
+                timeLeft = settings.focus * 60;
+                sessionCount++;
+                if (sessionCount > 4) sessionCount = 1;
+                updateSessionDots();
+            }
+
+            updateDisplay();
+            updateProgress(0);
+        }
+
+        function updateSessionDots() {
+            sessionDisplay.innerHTML = '';
+            for (let i = 1; i <= 4; i++) {
+                const dot = document.createElement('div');
+                dot.className = `h-2 w-8 rounded-full transition-colors ${i <= sessionCount ? 'bg-indigo-600' : 'bg-slate-200 dark:bg-slate-800'}`;
+                sessionDisplay.appendChild(dot);
+            }
+        }
+
+        // Settings
+        settingsBtn.onclick = () => settingsModal.classList.remove('hidden');
+        closeSettings.onclick = () => settingsModal.classList.add('hidden');
+        saveSettings.onclick = () => {
+            settings.focus = parseInt(focusInput.value);
+            settings.short = parseInt(shortBreakInput.value);
+            settings.long = parseInt(longBreakInput.value);
+            settingsModal.classList.add('hidden');
+            resetTimer();
+        };
+
+        mainBtn.onclick = toggleTimer;
+        resetBtn.onclick = resetTimer;
+
+        // Theme Toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        });
+
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+
+        init();
+    </script>
+</body>
+</html>
