@@ -28,6 +28,8 @@
             border: 1px solid rgba(255, 255, 255, 0.3);
         }
         ::-webkit-scrollbar { width: 0px; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body class="bg-[#FBFBFB] min-h-screen font-sans text-slate-900">
@@ -46,15 +48,15 @@
             </div>
 
             <nav class="flex-grow px-4 space-y-2">
-                <button onclick="setView('list')" class="nav-btn w-full flex items-center gap-4 px-4 py-3 bg-black text-white rounded-xl font-bold">
+                <button onclick="setView('list')" id="nav-list" class="nav-btn w-full flex items-center gap-4 px-4 py-3 bg-black text-white rounded-xl font-bold">
                     <i data-lucide="layout" class="w-5 h-5"></i>
                     <span class="hidden lg:block">Posts</span>
                 </button>
-                <button onclick="setView('editor')" class="nav-btn w-full flex items-center gap-4 px-4 py-3 text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-xl font-bold transition-all">
+                <button onclick="openNewPost()" id="nav-editor" class="nav-btn w-full flex items-center gap-4 px-4 py-3 text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-xl font-bold transition-all">
                     <i data-lucide="plus-circle" class="w-5 h-5"></i>
                     <span class="hidden lg:block">New Post</span>
                 </button>
-                <button class="nav-btn w-full flex items-center gap-4 px-4 py-3 text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-xl font-bold transition-all">
+                <button onclick="setView('media')" id="nav-media" class="nav-btn w-full flex items-center gap-4 px-4 py-3 text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-xl font-bold transition-all">
                     <i data-lucide="image" class="w-5 h-5"></i>
                     <span class="hidden lg:block">Media</span>
                 </button>
@@ -62,16 +64,16 @@
         </aside>
 
         <!-- Main Workspace -->
-        <main class="flex-grow overflow-y-auto">
+        <main class="flex-grow overflow-y-auto bg-white">
 
             <!-- List View -->
-            <div id="listView" class="p-8 lg:p-20 space-y-12">
+            <div id="listView" class="p-8 lg:p-20 space-y-12 bg-[#FBFBFB] min-h-full">
                 <header class="flex justify-between items-center">
                     <div>
                         <h1 class="text-5xl font-serif font-bold">All Posts</h1>
                         <p class="text-slate-400 font-medium mt-2">Managing your digital content effortlessly.</p>
                     </div>
-                    <button onclick="setView('editor')" class="px-8 py-4 bg-black text-white rounded-2xl font-bold hover:opacity-80 transition-all shadow-xl shadow-slate-200">
+                    <button onclick="openNewPost()" class="px-8 py-4 bg-black text-white rounded-2xl font-bold hover:opacity-80 transition-all shadow-xl shadow-slate-200">
                         Create Post
                     </button>
                 </header>
@@ -89,29 +91,104 @@
                         Back to Posts
                     </button>
                     <div class="flex items-center gap-4">
-                        <span class="text-xs font-black uppercase tracking-widest text-slate-300">Draft</span>
+                        <span id="editorStatus" class="text-xs font-black uppercase tracking-widest text-slate-300">New Draft</span>
                         <button id="savePostBtn" class="px-8 py-3 bg-black text-white rounded-xl font-bold hover:opacity-80 transition-all">Publish</button>
                     </div>
                 </header>
+
+                <!-- Toolbar -->
+                <div class="px-8 py-4 border-b border-slate-50 bg-slate-50/50 flex gap-4 overflow-x-auto no-scrollbar">
+                    <button onclick="format('bold')" class="p-2 hover:bg-white hover:shadow-sm rounded-lg transition-all" title="Bold"><i data-lucide="bold" class="w-4 h-4"></i></button>
+                    <button onclick="format('italic')" class="p-2 hover:bg-white hover:shadow-sm rounded-lg transition-all" title="Italic"><i data-lucide="italic" class="w-4 h-4"></i></button>
+                    <button onclick="insertLink()" class="p-2 hover:bg-white hover:shadow-sm rounded-lg transition-all" title="Link"><i data-lucide="link" class="w-4 h-4"></i></button>
+                    <div class="w-px h-8 bg-slate-200 mx-2"></div>
+                    <button onclick="format('insertUnorderedList')" class="p-2 hover:bg-white hover:shadow-sm rounded-lg transition-all" title="Bullet List"><i data-lucide="list" class="w-4 h-4"></i></button>
+                    <button onclick="format('heading', 'h2')" class="p-2 hover:bg-white hover:shadow-sm rounded-lg transition-all font-bold" title="H2">H2</button>
+                    <button onclick="format('heading', 'h3')" class="p-2 hover:bg-white hover:shadow-sm rounded-lg transition-all font-bold" title="H3">H3</button>
+                    <div class="w-px h-8 bg-slate-200 mx-2"></div>
+                    <button onclick="openMediaSelector()" class="p-2 hover:bg-white hover:shadow-sm rounded-lg transition-all" title="Insert Image"><i data-lucide="image" class="w-4 h-4"></i></button>
+                </div>
+
                 <div class="flex-grow p-8 lg:p-20 max-w-4xl mx-auto w-full space-y-12">
                     <input type="text" id="postTitle" placeholder="Post Title" class="w-full text-6xl font-serif font-bold border-none outline-none placeholder:text-slate-100">
-                    <textarea id="postContent" placeholder="Tell your story..." class="w-full h-96 text-xl leading-relaxed text-slate-600 border-none outline-none resize-none placeholder:text-slate-100"></textarea>
+                    <div id="postEditor" contenteditable="true" class="w-full min-h-[400px] text-xl leading-relaxed text-slate-600 border-none outline-none placeholder:text-slate-100 prose prose-slate max-w-none">
+                        <p>Tell your story...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Media View -->
+            <div id="mediaView" class="hidden p-8 lg:p-20 space-y-12 bg-[#FBFBFB] min-h-full">
+                <header class="flex justify-between items-center">
+                    <div>
+                        <h1 class="text-5xl font-serif font-bold">Media Library</h1>
+                        <p class="text-slate-400 font-medium mt-2">Manage your assets and images.</p>
+                    </div>
+                    <label class="px-8 py-4 bg-black text-white rounded-2xl font-bold hover:opacity-80 transition-all shadow-xl shadow-slate-200 cursor-pointer">
+                        Upload Asset
+                        <input type="file" id="mediaUpload" accept="image/*" class="hidden">
+                    </label>
+                </header>
+
+                <div id="mediaContainer" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                    <!-- Media items -->
                 </div>
             </div>
         </main>
+    </div>
+
+    <!-- Preview Modal -->
+    <div id="previewModal" class="fixed inset-0 z-50 bg-white hidden overflow-y-auto">
+        <div class="max-w-4xl mx-auto px-8 py-20 relative">
+            <button onclick="closePreview()" class="fixed top-8 right-8 p-3 bg-slate-100 rounded-full hover:bg-slate-200 transition-all">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+            <div class="space-y-8">
+                <div class="flex items-center gap-4">
+                    <span id="previewDate" class="text-xs font-black uppercase tracking-widest text-indigo-600"></span>
+                    <div class="h-px flex-grow bg-slate-100"></div>
+                </div>
+                <h1 id="previewTitle" class="text-6xl font-serif font-bold"></h1>
+                <div id="previewContent" class="prose prose-slate prose-xl max-w-none text-slate-600"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Media Selector Modal -->
+    <div id="mediaSelector" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-[2.5rem] w-full max-w-4xl max-h-[80vh] flex flex-col overflow-hidden">
+            <div class="p-8 border-b border-slate-100 flex justify-between items-center">
+                <h2 class="text-2xl font-serif font-bold">Select Image</h2>
+                <button onclick="closeMediaSelector()" class="p-2 hover:bg-slate-50 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="flex-grow overflow-y-auto p-8">
+                <div id="selectorContainer" class="grid grid-cols-3 md:grid-cols-4 gap-4">
+                    <!-- Media list -->
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
         lucide.createIcons();
 
         let posts = JSON.parse(localStorage.getItem('ink_posts')) || [
-            { id: 1, title: 'The Future of Minimalism', excerpt: 'How simple design is changing the way we interact with technology.', date: 'Oct 24, 2023', status: 'Published' },
-            { id: 2, title: 'Typography in Modern CMS', excerpt: 'Why font choice matters more than your backend architecture.', date: 'Oct 22, 2023', status: 'Draft' }
+            { id: 1, title: 'The Future of Minimalism', content: '<p>How simple design is changing the way we interact with technology.</p>', date: 'Oct 24, 2023', status: 'Published' },
+            { id: 2, title: 'Typography in Modern CMS', content: '<p>Why font choice matters more than your backend architecture.</p>', date: 'Oct 22, 2023', status: 'Draft' }
         ];
+
+        let media = JSON.parse(localStorage.getItem('ink_media')) || [
+            { id: 1, url: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&q=80' },
+            { id: 2, url: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&q=80' },
+            { id: 3, url: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&q=80' }
+        ];
+
+        let currentEditingId = null;
 
         function setView(view) {
             document.getElementById('listView').classList.toggle('hidden', view !== 'list');
             document.getElementById('editorView').classList.toggle('hidden', view !== 'editor');
+            document.getElementById('mediaView').classList.toggle('hidden', view !== 'media');
 
             // Update nav buttons
             const btns = document.querySelectorAll('.nav-btn');
@@ -119,11 +196,18 @@
                 btn.classList.remove('bg-black', 'text-white');
                 btn.classList.add('text-slate-400');
             });
-            const activeIdx = view === 'list' ? 0 : 1;
-            btns[activeIdx].classList.replace('text-slate-400', 'text-white');
-            btns[activeIdx].classList.add('bg-black');
+
+            const activeBtnId = `nav-${view}`;
+            const activeBtn = document.getElementById(activeBtnId);
+            if (activeBtn) {
+                activeBtn.classList.replace('text-slate-400', 'text-white');
+                activeBtn.classList.add('bg-black');
+            }
 
             if (view === 'list') renderPosts();
+            if (view === 'media') renderMedia();
+
+            lucide.createIcons();
         }
 
         function renderPosts() {
@@ -132,6 +216,7 @@
             posts.forEach(post => {
                 const div = document.createElement('div');
                 div.className = 'post-card bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6';
+                const excerpt = post.content.replace(/<[^>]*>/g, '').substring(0, 100) + '...';
                 div.innerHTML = `
                     <div class="flex justify-between items-start">
                         <span class="px-4 py-1 rounded-full text-[10px] font-black tracking-widest uppercase ${post.status === 'Published' ? 'bg-green-50 text-green-600' : 'bg-orange-50 text-orange-600'}">
@@ -141,35 +226,167 @@
                     </div>
                     <div>
                         <h3 class="text-2xl font-serif font-bold mb-3">${post.title}</h3>
-                        <p class="text-slate-500 text-sm leading-relaxed line-clamp-3">${post.excerpt || 'No description provided.'}</p>
+                        <p class="text-slate-500 text-sm leading-relaxed line-clamp-3">${excerpt}</p>
                     </div>
                     <div class="pt-6 border-t border-slate-50 flex gap-4">
-                        <button class="text-xs font-bold hover:text-indigo-600">Edit</button>
-                        <button class="text-xs font-bold hover:text-indigo-600">Preview</button>
+                        <button onclick="editPost(${post.id})" class="text-xs font-bold hover:text-indigo-600 transition-colors">Edit</button>
+                        <button onclick="previewPost(${post.id})" class="text-xs font-bold hover:text-indigo-600 transition-colors">Preview</button>
+                        <button onclick="deletePost(${post.id})" class="text-xs font-bold hover:text-red-600 ml-auto transition-colors">Delete</button>
                     </div>
                 `;
                 container.appendChild(div);
             });
         }
 
+        // Post Actions
+        function openNewPost() {
+            currentEditingId = null;
+            document.getElementById('postTitle').value = '';
+            document.getElementById('postEditor').innerHTML = '<p>Tell your story...</p>';
+            document.getElementById('editorStatus').innerText = 'New Draft';
+            setView('editor');
+        }
+
+        function editPost(id) {
+            const post = posts.find(p => p.id === id);
+            if (!post) return;
+            currentEditingId = id;
+            document.getElementById('postTitle').value = post.title;
+            document.getElementById('postEditor').innerHTML = post.content;
+            document.getElementById('editorStatus').innerText = 'Editing Draft';
+            setView('editor');
+        }
+
+        function previewPost(id) {
+            const post = posts.find(p => p.id === id);
+            if (!post) return;
+            document.getElementById('previewTitle').innerText = post.title;
+            document.getElementById('previewContent').innerHTML = post.content;
+            document.getElementById('previewDate').innerText = post.date;
+            document.getElementById('previewModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            lucide.createIcons();
+        }
+
+        function closePreview() {
+            document.getElementById('previewModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        function deletePost(id) {
+            if (!confirm('Are you sure you want to delete this post?')) return;
+            posts = posts.filter(p => p.id !== id);
+            localStorage.setItem('ink_posts', JSON.stringify(posts));
+            renderPosts();
+        }
+
         document.getElementById('savePostBtn').onclick = () => {
             const title = document.getElementById('postTitle').value;
-            const content = document.getElementById('postContent').value;
+            const content = document.getElementById('postEditor').innerHTML;
             if (!title) return;
 
-            posts.unshift({
-                id: Date.now(),
-                title: title,
-                excerpt: content.substring(0, 100) + '...',
-                date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-                status: 'Published'
-            });
+            if (currentEditingId) {
+                const idx = posts.findIndex(p => p.id === currentEditingId);
+                posts[idx] = {
+                    ...posts[idx],
+                    title,
+                    content,
+                    status: 'Published'
+                };
+            } else {
+                posts.unshift({
+                    id: Date.now(),
+                    title: title,
+                    content: content,
+                    date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                    status: 'Published'
+                });
+            }
+
             localStorage.setItem('ink_posts', JSON.stringify(posts));
             setView('list');
-            document.getElementById('postTitle').value = '';
-            document.getElementById('postContent').value = '';
         };
 
+        // Formatting
+        function format(command, value = null) {
+            if (command === 'heading') {
+                document.execCommand('formatBlock', false, value);
+            } else {
+                document.execCommand(command, false, value);
+            }
+        }
+
+        function insertLink() {
+            const url = prompt('Enter the link URL:');
+            if (url) document.execCommand('createLink', false, url);
+        }
+
+        // Media Management
+        function renderMedia(containerId = 'mediaContainer', isSelector = false) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            media.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'group relative aspect-square rounded-2xl overflow-hidden bg-slate-100 border border-slate-100 cursor-pointer';
+                div.innerHTML = `
+                    <img src="${item.url}" class="w-full h-full object-cover transition-transform group-hover:scale-110">
+                    ${isSelector ?
+                        `<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <span class="text-white text-xs font-bold">Insert</span>
+                        </div>` :
+                        `<button onclick="deleteMedia(${item.id})" class="absolute top-2 right-2 p-2 bg-white/90 rounded-xl opacity-0 group-hover:opacity-100 transition-all text-red-500 hover:bg-red-500 hover:text-white">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>`
+                    }
+                `;
+                if (isSelector) {
+                    div.onclick = () => insertMedia(item.url);
+                }
+                container.appendChild(div);
+            });
+            lucide.createIcons();
+        }
+
+        document.getElementById('mediaUpload').onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                media.unshift({
+                    id: Date.now(),
+                    url: event.target.result
+                });
+                localStorage.setItem('ink_media', JSON.stringify(media));
+                renderMedia();
+            };
+            reader.readAsDataURL(file);
+        };
+
+        function deleteMedia(id) {
+            event.stopPropagation();
+            if (!confirm('Delete this image?')) return;
+            media = media.filter(m => m.id !== id);
+            localStorage.setItem('ink_media', JSON.stringify(media));
+            renderMedia();
+        }
+
+        function openMediaSelector() {
+            renderMedia('selectorContainer', true);
+            document.getElementById('mediaSelector').classList.remove('hidden');
+        }
+
+        function closeMediaSelector() {
+            document.getElementById('mediaSelector').classList.add('hidden');
+        }
+
+        function insertMedia(url) {
+            const img = `<img src="${url}" class="rounded-2xl my-8 w-full">`;
+            document.getElementById('postEditor').focus();
+            document.execCommand('insertHTML', false, img);
+            closeMediaSelector();
+        }
+
+        // Initialize
         renderPosts();
     </script>
 </body>
