@@ -168,7 +168,8 @@
         const gallery = document.getElementById('gallery');
 
         btn.onclick = () => {
-            const val = prompt.value.trim();
+            var val = prompt.value.trim();
+            val = val.replace(/\s+/g, '');
             if (!val) return;
 
             // Show placeholder
@@ -182,7 +183,7 @@
 
             // Real generation using Pollinations.ai
             const seed = Math.floor(Math.random() * 1000000);
-            const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(val)}?nologo=true&seed=${seed}`;
+            const imageUrl = `https://image.pollinations.ai/prompt/${val}`;
 
             placeholder.innerHTML = `
                 <div class="aspect-square relative overflow-hidden">
