@@ -155,24 +155,31 @@
 
             prompt.value = '';
 
-            // Simulate generation
-            setTimeout(() => {
+            // Real generation using Pollinations.ai
+            const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(val)}?width=800&height=800&seed=${Math.floor(Math.random() * 1000000)}&nologo=true`;
+
+            const img = new Image();
+            img.onload = () => {
                 placeholder.classList.remove('shimmer');
                 placeholder.classList.add('group');
                 placeholder.innerHTML = `
                     <div class="aspect-square relative overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1579546678183-a9c101ad5e22?w=800&q=80" class="w-full h-full object-cover group-hover:scale-110 transition-all duration-700">
+                        <img src="${imageUrl}" class="w-full h-full object-cover group-hover:scale-110 transition-all duration-700">
                         <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-8 space-y-4">
-                            <p class="text-sm font-medium text-white italic">"${val}"</p>
+                            <p class="text-sm font-medium text-white italic line-clamp-3">"${val}"</p>
                             <div class="flex gap-2">
-                                <button class="flex-grow py-3 bg-white text-black rounded-xl font-bold text-xs">Download</button>
+                                <a href="${imageUrl}" target="_blank" download="ai-image.jpg" class="flex-grow py-3 bg-white text-black rounded-xl font-bold text-xs text-center">Download</a>
                                 <button class="p-3 bg-white/10 text-white rounded-xl"><i data-lucide="heart" class="w-4 h-4"></i></button>
                             </div>
                         </div>
                     </div>
                 `;
                 lucide.createIcons();
-            }, 3000);
+            };
+            img.onerror = () => {
+                placeholder.innerHTML = '<div class="p-8 text-center"><p class="text-red-500 font-bold">Failed to generate</p></div>';
+            };
+            img.src = imageUrl;
         };
     </script>
 </body>
