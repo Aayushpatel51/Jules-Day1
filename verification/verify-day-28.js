@@ -38,6 +38,7 @@ const path = require('path');
   console.log('Testing new post with media...');
   await page.click('#nav-editor');
   await page.fill('#postTitle', 'Post with Image');
+  await page.screenshot({ path: 'verification/day-28-editor.png' });
   await page.click('button[title="Insert Image"]');
   await page.waitForSelector('#mediaSelector:not(.hidden)');
   await page.click('#selectorContainer > div:first-child'); // Select first image
