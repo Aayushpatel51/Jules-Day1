@@ -138,6 +138,31 @@
     <script>
         lucide.createIcons();
 
+        function handleImageLoad(img) {
+            img.classList.remove('opacity-0');
+            const glass = img.closest('.glass');
+            if (glass) {
+                glass.classList.remove('shimmer');
+                glass.classList.add('group');
+            }
+        }
+
+        function handleImageError(img) {
+            const glass = img.closest('.glass');
+            if (glass) {
+                glass.classList.remove('shimmer');
+                glass.innerHTML = `
+                    <div class="p-8 text-center space-y-4">
+                        <i data-lucide="alert-circle" class="w-8 h-8 text-red-500 mx-auto"></i>
+                        <p class="text-red-500 font-bold">Generation Error</p>
+                        <p class="text-xs text-slate-500">The AI model is busy or the prompt was blocked.</p>
+                        <button onclick="this.closest('.glass').remove()" class="text-xs text-slate-400 underline">Dismiss</button>
+                    </div>
+                `;
+                lucide.createIcons();
+            }
+        }
+
         const btn = document.getElementById('generateBtn');
         const prompt = document.getElementById('promptInput');
         const gallery = document.getElementById('gallery');
@@ -156,30 +181,25 @@
             prompt.value = '';
 
             // Real generation using Pollinations.ai
-            const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(val)}?width=800&height=800&seed=${Math.floor(Math.random() * 1000000)}&nologo=true`;
+            const seed = Math.floor(Math.random() * 1000000);
+            const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(val)}?nologo=true&seed=${seed}`;
 
-            const img = new Image();
-            img.onload = () => {
-                placeholder.classList.remove('shimmer');
-                placeholder.classList.add('group');
-                placeholder.innerHTML = `
-                    <div class="aspect-square relative overflow-hidden">
-                        <img src="${imageUrl}" class="w-full h-full object-cover group-hover:scale-110 transition-all duration-700">
-                        <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-8 space-y-4">
-                            <p class="text-sm font-medium text-white italic line-clamp-3">"${val}"</p>
-                            <div class="flex gap-2">
-                                <a href="${imageUrl}" target="_blank" download="ai-image.jpg" class="flex-grow py-3 bg-white text-black rounded-xl font-bold text-xs text-center">Download</a>
-                                <button class="p-3 bg-white/10 text-white rounded-xl"><i data-lucide="heart" class="w-4 h-4"></i></button>
-                            </div>
+            placeholder.innerHTML = `
+                <div class="aspect-square relative overflow-hidden">
+                    <img src="${imageUrl}"
+                         class="w-full h-full object-cover group-hover:scale-110 transition-all duration-700 opacity-0"
+                         onload="handleImageLoad(this)"
+                         onerror="handleImageError(this)">
+                    <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-8 space-y-4">
+                        <p class="text-sm font-medium text-white italic line-clamp-3">"${val}"</p>
+                        <div class="flex gap-2">
+                            <a href="${imageUrl}" target="_blank" class="flex-grow py-3 bg-white text-black rounded-xl font-bold text-xs text-center">Open Full</a>
+                            <button class="p-3 bg-white/10 text-white rounded-xl"><i data-lucide="heart" class="w-4 h-4"></i></button>
                         </div>
                     </div>
-                `;
-                lucide.createIcons();
-            };
-            img.onerror = () => {
-                placeholder.innerHTML = '<div class="p-8 text-center"><p class="text-red-500 font-bold">Failed to generate</p></div>';
-            };
-            img.src = imageUrl;
+                </div>
+            `;
+            lucide.createIcons();
         };
     </script>
 </body>

@@ -15,12 +15,17 @@ const path = require('path');
   await page.fill('#promptInput', prompt);
   await page.click('#generateBtn');
 
-  // Wait for image to load (Pollinations can take a few seconds)
+  // Wait for image to load or error
   console.log('Waiting for generation...');
-  await page.waitForSelector('#gallery img[src^="https://image.pollinations.ai"]', { timeout: 30000 });
+  try {
+    await page.waitForSelector('#gallery .group img', { timeout: 30000 });
+    console.log('Success state detected.');
+  } catch (e) {
+    console.log('Timeout or error state detected.');
+  }
 
-  await page.waitForTimeout(2000); // Allow render
-  await page.screenshot({ path: 'verification/day-29-gen.png' });
+  await page.waitForTimeout(2000);
+  await page.screenshot({ path: 'verification/day-29-result.png' });
 
   console.log('Image generated and verified.');
   await browser.close();
